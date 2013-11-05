@@ -64,6 +64,19 @@ class Server():
             print "Username and password don't match our database"
             return False
 
+    def check_authentication(self, client_ip, client_port):
+        # this method checks whether a client is authorized or not
+        for client in self.clients:
+            if client.ip == client_ip and client.port == client_port:
+                return True
+        return False
+
+    def lock_client_files(self, filename, source_ip, source_port):
+        for client in self.clients:
+            if not (source_ip == client.ip and source_port == client.port):
+                rpc_connect = xmlrpclib.ServerProxy("http://%s:%s/"% (client.ip, client.port), allow_none = True)
+                rpc_connect.lock_file_local(filename)
+
     def activate(self):
         print "activating server"
         self.start_server()

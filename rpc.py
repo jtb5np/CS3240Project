@@ -6,9 +6,12 @@ import errno
 import xmlrpclib
 import logging
 
-def pull_file(dest_ip, dest_port, filename, source_uname, source_ip):
+def pull_file(dest_ip, dest_port, filename, source_uname, source_ip, source_port):
     rpc_connect = xmlrpclib.ServerProxy("http://%s:%s/"% (dest_ip, dest_port), allow_none = True)
-    rpc_connect.pull_file(filename, source_uname, source_ip)
+    if rpc_connect.check_authentication(source_ip, source_port):
+        rpc_connect.pull_file(filename, source_uname, source_ip)
+    else:
+        return False
 
 def req_push_file(dest_ip, dest_port, filedata, source_uname, source_ip, source_port):
     rpc_connect = xmlrpclib.ServerProxy("http://%s:%s/"% (dest_ip, dest_port), allow_none = True)
@@ -40,6 +43,9 @@ def authenticate_user(dest_ip, dest_port, source_ip, source_port, username, user
     rpc_connect = xmlrpclib.ServerProxy("http://%s:%s/"% (dest_ip, dest_port), allow_none = True)
     rpc_connect.authenticate_user(source_ip, source_port, username, user_password)
 
-def test_math(dest_ip, dest_port):
-    rpc_connect = xmlrpclib.xmlrpclib.ServerProxy("http://%s:%s/"% (dest_ip, dest_port), allow_none = True)
-    return rpc_connect.test_math()
+def lock_file(filename, dest_ip, dest_port, source_ip, source_port):
+    rpc_connect = xmlrpclib.ServerProxy("http://%s:%s/"% (dest_ip, dest_port), allow_none = True)
+    if rpc_connect.check_authentication(source_ip, source_port):
+        rpc_connect.lock_client_files(filename, source_ip, source_port)
+    else:
+        return False
