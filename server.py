@@ -90,7 +90,7 @@ class Server():
 
 
 def main():
-    server = Server("192.168.146.13", 8003, get_clients())
+    server = Server("172.25.98.72", 8000, get_clients())
     server.activate()
 
 def get_clients():
