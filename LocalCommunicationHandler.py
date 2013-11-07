@@ -39,6 +39,8 @@ class LocalCommunicationHandler(threading.Thread):
         #if sign in successful, return True; otherwise, return False
         print 'sent user-id: ' + uid
         print 'sent password: ' + pwd
+        print 'server ip: ' + self.server_ip
+        print 'server port: ' + str(self.server_port)
         rpc.authenticate_user(self.server_ip, self.server_port, self.local_ip, self.local_port, uid, pwd)
 
     def change_password(self, pwd):
