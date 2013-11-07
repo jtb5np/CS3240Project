@@ -45,7 +45,7 @@ def main():
 
     #test script
     server_ip = "172.25.98.172"
-    server_port = 8000
+    server_port = 8003
     local_ip = "172.25.98.172"
     local_port = 9000
 
