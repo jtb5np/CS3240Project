@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/CS3240Project.iml" filepath="$PROJECT_DIR$/.idea/CS3240Project.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../SystemLog/.idea/SystemLog.iml" filepath="$PROJECT_DIR$/../SystemLog/.idea/SystemLog.iml" />
     </modules>
   </component>
 </project>
