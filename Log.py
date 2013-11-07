@@ -22,7 +22,7 @@ class Log:
 
         for x in self.log:
 
-           if isinstance(x,LogEntry):
+           if isinstance(x, LogEntry):
             x.printLogEntry()
 
 
