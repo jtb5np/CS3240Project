@@ -21,6 +21,21 @@ class LocalCommunicationHandler(threading.Thread):
         self.deleted_file_sender.start()
         self.server_listener.start()
 
+    def create_new_account(self, uid, pwd):
+        #send user id and password to server, create account
+        #if account is successfully created, store user id and
+        #password in a text file and return True, else return False
+        print 'sent user-id: ' + uid
+        print 'sent password: ' + pwd
+        return True
+
+    def change_password(self, pwd):
+        #send password to server, change password
+        #if password is successfully changed, change password in text file and return True
+        #else, return False
+        print 'sent password: ' + pwd
+        return True
+
     def send_file(self, file_name):
         #send a file to be copied to the server
         print 'sent: ' + file_name
