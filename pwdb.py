@@ -31,7 +31,7 @@ c.execute('''CREATE TABLE user
 #first check if account details do not already exist
 c.execute("INSERT INTO user VALUES ('user_name', 'password', 'directory_name', serverDirectoryID)")
 conn.commit()
-newpath = rootPath+serverDirectoryId
+newpath = rootPath+`serverDirectoryId`
 if not os.path.exists(newpath): os.makedirs(newpath)
 #synch files after new directory created?
 serverDirectoryId += 1
@@ -42,10 +42,10 @@ c.execute('SELECT * FROM user WHERE user_name=? AND password=?', t)
 
 #finding total file number per user
 for k in range (0, serverDirectoryId):
-    currentPath = rootPath+k
+    currentPath = rootPath+`k`
     numFiles = fcount(currentPath)
 
 #finding total file size per user
 for k in range(0, serverDirectoryId):
-    currentPath = rootPath+k
+    currentPath = rootPath+`k`
     fileSize = get_size(currentPath)
