@@ -93,7 +93,7 @@ class Server():
 
         conn = sqlite3.connect('passwords.db')
         c = conn.cursor()
-        c.execute('''CREATE TABLE user
+        if not os.path.exists('passwords.db'): c.execute('''CREATE TABLE user
              (user_name text, password text, directory_name text, serverId real)''')
 
         print "server activated"
