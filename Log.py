@@ -1,6 +1,6 @@
-__author__ = 'wil'
+import LogEntry
 
-from LogEntry import LogEntry
+__author__ = 'wil'
 
 
 class Log:
@@ -22,7 +22,7 @@ class Log:
 
         for x in self.log:
 
-           if isinstance(x,LogEntry):
+           if isinstance(x, LogEntry):
             x.printLogEntry()
 
 
