@@ -34,6 +34,7 @@ c.execute("INSERT INTO user VALUES ('user_name', 'password', 'directory_name', s
 conn.commit()
 newpath = rootPath+serverDirectoryId
 if not os.path.exists(newpath): os.makedirs(newpath)
+#synch files after new directory created?
 serverDirectoryId += 1
 
 #finding Account
