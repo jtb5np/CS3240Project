@@ -9,7 +9,7 @@ import rpc
 
 
 serverDirectoryId = 0
-rootPath = 'ROOTFILEPATH'
+rootPath = 'ROOTFILEPATHGOESHERE'
 
 class StoppableXMLRPCServer(SimpleXMLRPCServer.SimpleXMLRPCServer):
     """Override of TIME_WAIT"""
