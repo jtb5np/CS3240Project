@@ -42,7 +42,14 @@ def main():
     files_to_send = Queue()
     files_to_delete = Queue()
     fwr = FileWatcher(files_to_send, files_to_delete, name)
-    lch = LocalCommunicationHandler(files_to_send, files_to_delete)
+
+    #test script
+    server_ip = "172.25.98.72"
+    server_port = 8000
+    local_ip = "172.25.98.72"
+    local_port = 9000
+
+    lch = LocalCommunicationHandler(server_ip, server_port, local_ip, local_port, files_to_send, files_to_delete)
     listener_thread = threading.Thread(target=listen_for_connection, args=(lch))
     fwr.start()
     lch.start()

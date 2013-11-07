@@ -3,11 +3,12 @@ __author__ = 'Jacob'
 import threading
 from Queue import *
 from time import sleep
+import rpc
 
 
 class LocalCommunicationHandler(threading.Thread):
 
-    def __init__(self, q = Queue(), dq = Queue()):
+    def __init__(self, server_ip, server_port, local_ip, local_port, q = Queue(), dq = Queue()):
         threading.Thread.__init__(self)
         self.file_names = q
         self.deleted_file_names = dq
@@ -15,6 +16,10 @@ class LocalCommunicationHandler(threading.Thread):
         self.deleted_file_sender = threading.Thread(target=self.delete_files)
         self.server_listener = threading.Thread(target=self.listen)
         self.sync_on = False
+        self.local_ip = local_ip
+        self.local_port = local_port
+        self.server_ip = server_ip
+        self.server_port = server_port
 
     def run(self):
         self.file_sender.start()
@@ -28,6 +33,13 @@ class LocalCommunicationHandler(threading.Thread):
         print 'sent user-id: ' + uid
         print 'sent password: ' + pwd
         return True
+
+    def sign_in(self, uid, pwd):
+        #send user id and password to server, sign in
+        #if sign in successful, return True; otherwise, return False
+        print 'sent user-id: ' + uid
+        print 'sent password: ' + pwd
+        rpc.authenticate_user(self.server_ip, self.server_port, self.local_ip, self.local_port, uid, pwd)
 
     def change_password(self, pwd):
         #send password to server, change password
