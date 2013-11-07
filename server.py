@@ -4,12 +4,17 @@ import xmlrpclib
 import rpc
 import threading
 import SimpleXMLRPCServer
+import sqlite3
+import os
 import time
 import rpc
 
 
 serverDirectoryId = 0
 rootPath = 'ROOTFILEPATHGOESHERE'
+conn = None
+c = None
+
 
 class StoppableXMLRPCServer(SimpleXMLRPCServer.SimpleXMLRPCServer):
     """Override of TIME_WAIT"""
@@ -85,6 +90,12 @@ class Server():
     def activate(self):
         print "activating server"
         self.start_server()
+
+        conn = sqlite3.connect('passwords.db')
+        c = conn.cursor()
+        c.execute('''CREATE TABLE user
+             (user_name text, password text, directory_name text, serverId real)''')
+
         print "server activated"
         #self.find_available_clients()
 
