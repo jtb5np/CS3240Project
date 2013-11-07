@@ -44,7 +44,7 @@ class Server():
 
     def start_server(self):
         """Start RPC Server on each node """
-        server = StoppableXMLRPCServer(("192.168.146.13", self.port), allow_none =True)
+        server = SimpleXMLRPCServer.SimpleXMLRPCServer((self.ip, self.port), allow_none =True)
         server.register_instance(self)
         server.register_introspection_functions()
         server_wait = threading.Thread(target=server.serve_forever)
@@ -72,6 +72,8 @@ class Server():
             print "Loggin successful for user: " + username
         else:
             print "Username and password don't match our database"
+            print 'user name: ' + username
+            print 'password: ' + user_password
             return False
 
     def check_authentication(self, client_ip, client_port):
@@ -88,7 +90,7 @@ class Server():
                 rpc_connect.lock_file_local(filename)
 
     def activate(self):
-        print "activating server"
+        print "activating server with IP = " + self.ip
         self.start_server()
 
         conn = sqlite3.connect('passwords.db')
@@ -101,12 +103,12 @@ class Server():
 
 
 def main():
-    server = Server("172.25.98.72", 8000, get_clients())
+    server = Server("172.25.98.172", 8000, get_clients())
     server.activate()
 
 def get_clients():
     clients = []
-    clients.append(ClientData("192.168.146.13",9000))
+    clients.append(ClientData("172.25.98.72",9000))
     return clients
 
 

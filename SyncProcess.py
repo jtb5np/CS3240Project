@@ -44,15 +44,16 @@ def main():
     fwr = FileWatcher(files_to_send, files_to_delete, name)
 
     #test script
-    server_ip = "172.25.98.72"
+    server_ip = "172.25.98.172"
     server_port = 8000
-    local_ip = "172.25.98.72"
+    local_ip = "172.25.98.172"
     local_port = 9000
 
     lch = LocalCommunicationHandler(server_ip, server_port, local_ip, local_port, files_to_send, files_to_delete)
-    listener_thread = threading.Thread(target=listen_for_connection, args=(lch))
+    listener_thread = threading.Thread(target=listen_for_connection, args=(lch,))
     fwr.start()
     lch.start()
+    lch.sign_in("jacob","pwd")
     listener_thread.start()
 
 

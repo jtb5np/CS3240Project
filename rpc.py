@@ -40,6 +40,8 @@ def mark_presence(dest_ip, dest_port, source_ip, source_port):
     rpc_connect.mark_presence(source_ip, source_port)
 
 def authenticate_user(dest_ip, dest_port, source_ip, source_port, username, user_password):
+    print "Server ip: " + dest_ip
+    print "Server port" + str(dest_port)
     rpc_connect = xmlrpclib.ServerProxy("http://%s:%s/"% (dest_ip, dest_port), allow_none = True)
     rpc_connect.authenticate_user(source_ip, source_port, username, user_password)
 
