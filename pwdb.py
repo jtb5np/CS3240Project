@@ -24,7 +24,6 @@ def get_size(path):
 #sql user database fields
 conn = sqlite3.connect('passwords.db')
 c = conn.cursor()
-
 c.execute('''CREATE TABLE user
              (user_name text, password text, directory_name text, serverId real)''')
 

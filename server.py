@@ -7,6 +7,10 @@ import SimpleXMLRPCServer
 import time
 import rpc
 
+
+serverDirectoryId = 0
+rootPath = 'ROOTFILEPATH'
+
 class StoppableXMLRPCServer(SimpleXMLRPCServer.SimpleXMLRPCServer):
     """Override of TIME_WAIT"""
     allow_reuse_address = True
@@ -26,6 +30,7 @@ class ClientData():
         self.available = False
 
 class Server():
+
     def __init__(self, ip, port, clients):
         self.ip = ip
         self.port = port
