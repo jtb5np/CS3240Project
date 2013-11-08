@@ -38,8 +38,6 @@ class Client():
         self.mark_presence()
         #self.login()
 
-
-
 def main():
     print "haha"
     client = Client("192.168.146.13", 9000, ["192.168.146.13:8003"])

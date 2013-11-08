@@ -4,12 +4,8 @@ import xmlrpclib
 import rpc
 import threading
 import SimpleXMLRPCServer
-import os
-import sqlite3
 import time
 import rpc
-
-
 
 class StoppableXMLRPCServer(SimpleXMLRPCServer.SimpleXMLRPCServer):
     """Override of TIME_WAIT"""
@@ -35,11 +31,6 @@ class Server():
         self.port = port
         self.clients = clients
         self.authorized = []
-        #account management fields
-        self.serverDirectoryId=0
-        self.rootPath='ROOTFILEPATHHERE'
-        self.conn = sqlite3.connect('passwords.db')
-        self.c = self.conn.cursor()
 
     def start_server(self):
         """Start RPC Server on each node """
@@ -66,12 +57,6 @@ class Server():
                 ClientData.available = True
 
     def authenticate_user(self, client_ip, client_port, username, user_password):
-
-        authenticated = False
-        t = (username, user_password)
-        self.c.execute('SELECT * FROM user WHERE user_name=? AND password=?', t)
-
-
         if username == user_password: # code here should pass arguments to database to authenticate user; if condition here is temporary
             self.authorized.append(ClientData(client_ip, client_port))
             print "Loggin successful for user: " + username
@@ -97,23 +82,12 @@ class Server():
     def activate(self):
         print "activating server with IP = " + self.ip
         self.start_server()
-
-        #if not os.path.exists('passwords.db'):
-        #c.execute('''CREATE TABLE user (user_name text, password text, directory_name text, serverId real)''')
-
-        self.c.execute("INSERT INTO user VALUES ('jacob', 'jacob_pwd', 'directory_name', 0)")
-        self.conn.commit()
-
         print "server activated"
         #self.find_available_clients()
 
-def DatabaseManager():
-    def __init__(self)
-
-
 
 def main():
-    server = Server("172.25.98.172", 8003, get_clients())
+    server = Server("172.25.98.172", 8000, get_clients())
     server.activate()
 
 def get_clients():
