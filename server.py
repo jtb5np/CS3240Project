@@ -4,6 +4,7 @@ import xmlrpclib
 import rpc
 import threading
 import SimpleXMLRPCServer
+import socket
 import time
 import rpc
 
@@ -87,8 +88,16 @@ class Server():
 
 
 def main():
-    server = Server("172.25.98.172", 8000, get_clients())
-    server.activate()
+
+    #test code to automatically get the local ip address
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.connect(("gmail.com",80))
+    current_local_ip = s.getsockname()[0]
+    s.close()
+    print "current IP address is: " + current_local_ip
+    server = Server(current_local_ip, 8000, get_clients())
+    print "Starting the server..."
+    #server.activate()
 
 def get_clients():
     clients = []
