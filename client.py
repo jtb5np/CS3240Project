@@ -6,7 +6,7 @@ import subprocess
 
 
 class Client():
-    def __init__(self, ip, port, server):
+    def __init__(self, ip, port, server_ip, server_port):
         self.ip = ip
         self.port = port
         self.server = server
@@ -23,7 +23,8 @@ class Client():
     def push_file(self, filename, file, dest_ip, dest_port):
         # this method push the modified/new file to the server
         print "file updating..."
-        subprocess.Popen('')
+        rpc.push_file()
+        #subprocess.Popen('')
 
     def lock_file(self, filename, dest_ip, dest_port):
         # this method notifies the server to lock files being edited ==> so the detector will need to tell what files are being edited

@@ -7,10 +7,11 @@ import threading
 import multiprocessing
 import multiprocessing.connection
 import os
+import socket
 
 
 def listen_for_connection(ch):
-    l = multiprocessing.connection.Listener(address=('localhost', 6000))
+    l = multiprocessing.connection.Listener(address=('localhost', 6004))
     connection = l.accept()
     while True:
         try:
@@ -44,9 +45,9 @@ def main():
     fwr = FileWatcher(files_to_send, files_to_delete, name)
 
     #test script
-    server_ip = "172.25.98.172"
-    server_port = 8003
-    local_ip = "172.25.98.172"
+    server_ip = "192.168.146.18"
+    server_port = 8001
+    local_ip = "192.168.146.18"
     local_port = 9000
 
     lch = LocalCommunicationHandler(server_ip, server_port, local_ip, local_port, files_to_send, files_to_delete)
@@ -55,6 +56,7 @@ def main():
     lch.start()
     lch.sign_in("jacob","pwd")
     listener_thread.start()
+    lch.send_file("filename1")
 
 
 if __name__=='__main__':

@@ -4,6 +4,7 @@ import threading
 from Queue import *
 from time import sleep
 import rpc
+import subprocess
 
 
 class LocalCommunicationHandler(threading.Thread):
@@ -20,6 +21,7 @@ class LocalCommunicationHandler(threading.Thread):
         self.local_port = local_port
         self.server_ip = server_ip
         self.server_port = server_port
+        self.username = None
 
     def run(self):
         self.file_sender.start()
@@ -42,6 +44,7 @@ class LocalCommunicationHandler(threading.Thread):
         print 'server ip: ' + self.server_ip
         print 'server port: ' + str(self.server_port)
         rpc.authenticate_user(self.server_ip, self.server_port, self.local_ip, self.local_port, uid, pwd)
+        self.username = uid
 
     def change_password(self, pwd):
         #send password to server, change password
@@ -52,7 +55,13 @@ class LocalCommunicationHandler(threading.Thread):
 
     def send_file(self, file_name):
         #send a file to be copied to the server
-        print 'sent: ' + file_name
+        #uncomplete
+        print 'prepare to send: ' + file_name
+        rpc.push_file(self.server_ip, self.server_port, file_name, self.username, self.local_ip, self.local_port)
+        push_process = subprocess.Popen(['scp', file_name, "%s@%s:%s" % ("jacob", self.server_ip, "haha")])
+        status = push_process.wait()
+        print "Push status = " + str(status)
+
 
     def send_deleted_file(self, file_name):
         #send a file to be deleted from the server
