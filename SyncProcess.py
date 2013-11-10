@@ -42,7 +42,9 @@ def main():
         print 'Thank you for already creating that directory.'
     files_to_send = Queue()
     files_to_delete = Queue()
-    fwr = FileWatcher(files_to_send, files_to_delete, name)
+    files_to_receive = Queue()
+    deleted_files_to_receive = Queue()
+    fwr = FileWatcher(files_to_send, files_to_delete, files_to_receive, deleted_files_to_receive, name)
 
     #test script
     server_ip = "192.168.146.18"
@@ -50,7 +52,8 @@ def main():
     local_ip = "192.168.146.18"
     local_port = 9000
 
-    lch = LocalCommunicationHandler(server_ip, server_port, local_ip, local_port, files_to_send, files_to_delete)
+    lch = LocalCommunicationHandler(server_ip, server_port, local_ip, local_port, files_to_send, files_to_delete,
+                                    files_to_receive, deleted_files_to_receive)
     listener_thread = threading.Thread(target=listen_for_connection, args=(lch,))
     fwr.start()
     lch.start()

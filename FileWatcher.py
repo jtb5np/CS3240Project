@@ -9,17 +9,20 @@ import threading
 
 class FileWatcher(threading.Thread):
 
-    def __init__(self, q = Queue(), dq = Queue(), path = ''):
+    def __init__(self, q=Queue(), dq=Queue(), iq=Queue(), idq=Queue(), path=''):
         threading.Thread.__init__(self)
         self.path_name = path
         self.latest_time = 0
         self.files = []
         self.file_names = q
         self.deleted_file_names = dq
+        self.incoming_file_names = iq
+        self.incoming_deleted_file_names = idq
 
     def run(self):
         while True:
             self.find_all_files()
+            self.update_local_files()
 
     def find_modified_files(self):
         mod_files = []
@@ -69,7 +72,6 @@ class FileWatcher(threading.Thread):
                 self.files.append(f)
         return new_list
 
-
     def find_deleted_files(self):
         deleted_list = []
         temp_list = self.get_files_in(self.path_name)
@@ -79,7 +81,6 @@ class FileWatcher(threading.Thread):
         for f in deleted_list:
             self.files.remove(f)
         return deleted_list
-
 
     def find_all_files(self):
         deleted_files = self.find_deleted_files()
@@ -92,3 +93,18 @@ class FileWatcher(threading.Thread):
                 self.file_names.put(f)
         for f in deleted_files:
             self.deleted_file_names.put(f)
+
+    def update_local_files(self):
+        self.modify_local_file()
+        self.delete_local_file()
+
+    def delete_local_file(self):
+        df = self.incoming_deleted_file_names.get()
+        os.rmdir(self.path_name + df)
+        self.files.remove(df)
+        self.incoming_deleted_file_names.task_done()
+
+    def modify_local_file(self):
+        #how do we make the timing work???
+        #and perhaps more importantly, how do we get and use the file data?
+        print "I don't know what to do here"

@@ -9,10 +9,13 @@ import subprocess
 
 class LocalCommunicationHandler(threading.Thread):
 
-    def __init__(self, server_ip, server_port, local_ip, local_port, q = Queue(), dq = Queue()):
+    def __init__(self, server_ip, server_port, local_ip, local_port, q=Queue(), dq=Queue(),
+                 iq=Queue(), idq=Queue()):
         threading.Thread.__init__(self)
         self.file_names = q
         self.deleted_file_names = dq
+        self.incoming_file_names = iq
+        self.incoming_deleted_files = idq
         self.file_sender = threading.Thread(target=self.copy_files)
         self.deleted_file_sender = threading.Thread(target=self.delete_files)
         self.server_listener = threading.Thread(target=self.listen)
@@ -90,4 +93,10 @@ class LocalCommunicationHandler(threading.Thread):
                 else:
                     self.deleted_file_names.put(name)
                 self.deleted_file_names.task_done()
+
+    def delete_local_files(self, name):
+        self.incoming_deleted_files.put(name)
+
+    def modify_local_files(self, f_name, f_data):
+        print "I do not know what to do"
 
