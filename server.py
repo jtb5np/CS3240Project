@@ -3,14 +3,25 @@ __author__ = 'xf3da'
 import xmlrpclib
 import rpc
 import threading
-import SimpleXMLRPCServer
+from SimpleXMLRPCServer import SimpleXMLRPCServer, SimpleXMLRPCRequestHandler
 import socket
 import time
 import subprocess
 
-class StoppableXMLRPCServer(SimpleXMLRPCServer.SimpleXMLRPCServer):
+class Handler(SimpleXMLRPCRequestHandler):
+    def _dispatch(self, method, params):
+        try:
+            print self.server.funcs.items()
+            return self.server.funcs[method](*params)
+        except:
+            import traceback
+            traceback.print_exc()
+            raise
+
+class StoppableXMLRPCServer(SimpleXMLRPCServer):
     """Override of TIME_WAIT"""
     allow_reuse_address = True
+    stop = False
 
     def serve_forever(self):
         self.stop = False
@@ -39,15 +50,15 @@ class Server():
 
     def start_server(self):
         """Start RPC Server on each node """
-        server = StoppableXMLRPCServer((self.ip, self.port), allow_none =True)
+        server = StoppableXMLRPCServer(("0.0.0.0", self.port), allow_none =True)
+        print "server created"
         server.register_instance(self)
         server.register_introspection_functions()
-        #self.server = server
-        #self.server.serve_forever()
+        self.server = server
         server_wait = threading.Thread(target=server.serve_forever)
         server_wait.start()
-        #server.force_stop()
-        #print server_wait.is_alive()
+        print "server activated, server alive: " + str(server_wait.isAlive())
+        #server_wait._Thread__stop()
 
     def find_available_clients(self):
         for client in self.clients:
@@ -98,9 +109,8 @@ class Server():
         print "activating server with IP = " + self.ip
         self.start_server()
         print "server activated"
-        print "Attempting to stop the server with self.server.stop = " + str(self.server.stop)
-        self.server.force_stop()
-        print "Server status: self.server.stop = " + str(self.server.stop)
+        #self.server.force_stop()
+        #print "Server status: self.server.stop = " + str(self.server.stop)
         #self.find_available_clients()
 
 
@@ -111,8 +121,9 @@ def main():
     s.connect(("gmail.com",80))
     current_local_ip = s.getsockname()[0]
     s.close()
+
     print "current IP address is: " + current_local_ip
-    server = Server(current_local_ip, 8002, get_clients())
+    server = Server(current_local_ip, 8001, get_clients())
     print "Starting the server..."
     server.activate()
 

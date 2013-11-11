@@ -61,7 +61,7 @@ class LocalCommunicationHandler(threading.Thread):
         #uncomplete
         print 'prepare to send: ' + file_name
         rpc.push_file(self.server_ip, self.server_port, file_name, self.username, self.local_ip, self.local_port)
-        push_process = subprocess.Popen(['scp', file_name, "%s@%s:%s" % ("jacob", self.server_ip, "haha")])
+        push_process = subprocess.Popen(['scp -P 8001', "test.rtf", "%s@%s: %s" % ("jacob", "localhost", "/Users/xf3da/PycharmProjects/CS3240Project/haha/test.rtf")])
         status = push_process.wait()
         print "Push status = " + str(status)
 
