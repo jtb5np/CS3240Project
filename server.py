@@ -7,6 +7,7 @@ from SimpleXMLRPCServer import SimpleXMLRPCServer, SimpleXMLRPCRequestHandler
 import socket
 import time
 import subprocess
+from pwdb import *
 
 class Handler(SimpleXMLRPCRequestHandler):
     def _dispatch(self, method, params):
@@ -47,6 +48,8 @@ class Server():
         self.clients = clients
         self.authorized = []
         self.server = None
+        self.account_manager = dbManager("/Users/xf3da/Desktop/Account Folder")
+        print "Account Manager created"
 
     def start_server(self):
         """Start RPC Server on each node """
@@ -74,10 +77,14 @@ class Server():
             if client_ip == ClientData.ip and client_port == ClientData.port:
                 ClientData.available = True
 
+    def creat_account(self, username, password):
+        self.account_manager.createAccount(username, password, "TestDirName", self.account_manager.serverDirectoryId)
+
+
     def authenticate_user(self, client_ip, client_port, username, user_password):
-        if username == user_password: # code here should pass arguments to database to authenticate user; if condition here is temporary
+        if self.account_manager.loginAccount(username, user_password): # code here should pass arguments to database to authenticate user; if condition here is temporary
             self.authorized.append(ClientData(client_ip, client_port))
-            print "Loggin successful for user: " + username
+            print "Loggin successful for user: " + username + "and the password is " + user_password
         else:
             print "Username and password don't match our database"
             print 'user name: ' + username
@@ -96,6 +103,14 @@ class Server():
             if not (source_ip == client.ip and source_port == client.port):
                 rpc_connect = xmlrpclib.ServerProxy("http://%s:%s/"% (client.ip, client.port), allow_none = True)
                 rpc_connect.lock_file_local(filename)
+
+    def receive_file(self, filename, filedata, source_username, source_ip, source_port):
+        path, name = os.path.split(filename)
+
+        #os.makedirs("/Users/xf3da/Desktop/Account Folder/0")
+        with open("/Users/xf3da/Desktop/Account Folder/0/" + name, "wb") as handle:
+            handle.write(filedata.data)
+            return True
 
     def push_file(self, username, client_ip, client_port, filename):
         # receives the file that needs to be updated, and updates the current copy on the server
@@ -123,7 +138,7 @@ def main():
     s.close()
 
     print "current IP address is: " + current_local_ip
-    server = Server(current_local_ip, 8001, get_clients())
+    server = Server(current_local_ip, 8000, get_clients())
     print "Starting the server..."
     server.activate()
 

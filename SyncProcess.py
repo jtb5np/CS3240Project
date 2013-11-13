@@ -47,9 +47,9 @@ def main():
     fwr = FileWatcher(files_to_send, files_to_delete, files_to_receive, deleted_files_to_receive, name)
 
     #test script
-    server_ip = "192.168.146.18"
-    server_port = 8001
-    local_ip = "192.168.146.18"
+    server_ip = "172.25.45.163"
+    server_port = 8000
+    local_ip = "172.25.45.163"
     local_port = 9000
 
     lch = LocalCommunicationHandler(server_ip, server_port, local_ip, local_port, files_to_send, files_to_delete,
@@ -57,9 +57,13 @@ def main():
     listener_thread = threading.Thread(target=listen_for_connection, args=(lch,))
     fwr.start()
     lch.start()
-    lch.sign_in("jacob","pwd")
+    lch.create_new_account("mark", "markspassword")
+    lch.sign_in("mark", "markspassword")
+    lch.send_file("/Users/xf3da/Desktop/testfile.rtf")
+
+
     listener_thread.start()
-    lch.send_file("filename1")
+
 
 
 if __name__=='__main__':

@@ -6,8 +6,8 @@ class dbManager:
 
     def __init__(self, rootPath):
         self.rootPath = rootPath+'/'
-        self.serverDirectoryId = self.get_subdirs(self.rootPath)
-        #self.serverDirectoryId = 0
+        #self.serverDirectoryId = self.get_subdirs(self.rootPath)
+        self.serverDirectoryId = 0
         if not os.path.isfile(self.rootPath+'passwords.db'):
             self.conn = sqlite3.connect(self.rootPath+'passwords.db')
             self.c = self.conn.cursor()

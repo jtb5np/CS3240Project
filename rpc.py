@@ -6,13 +6,9 @@ import errno
 import xmlrpclib
 import logging
 
-def push_file(dest_ip, dest_port, filename, source_username, source_ip, source_port):
+def push_file(dest_ip, dest_port, filename, filedata, source_username, source_ip, source_port):
     rpc_connect = xmlrpclib.ServerProxy("http://%s:%s/"% (dest_ip, dest_port), allow_none = True)
-    print "proxy created with dest_ip = " + dest_ip
-    if True:
-        rpc_connect.push_file(source_username, source_ip, source_port, filename)
-    else:
-        return False
+    rpc_connect.receive_file(filename, filedata, source_username, source_ip, source_port)
 
 def find_available(dest_ip, dest_port):
     rpc_connect = xmlrpclib.ServerProxy("http://%s:%s/"% (dest_ip, dest_port), allow_none = True)
@@ -31,6 +27,13 @@ def mark_presence(dest_ip, dest_port, source_ip, source_port):
     print "rpc_connect created"
     print rpc_connect.system.listMethods()
     rpc_connect.mark_presence(source_ip, source_port)
+
+def create_account(dest_ip, dest_port, username, user_password):
+    print "in RPC creat_account"
+    rpc_connect = xmlrpclib.ServerProxy("http://%s:%s/"% (dest_ip, dest_port), allow_none = True)
+    print "rpc_connect created"
+    rpc_connect.creat_account(username, user_password)
+
 
 def authenticate_user(dest_ip, dest_port, source_ip, source_port, username, user_password):
     print "Server ip: " + dest_ip

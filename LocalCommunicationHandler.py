@@ -2,6 +2,7 @@ __author__ = 'Jacob'
 
 import threading
 from Queue import *
+import xmlrpclib
 from time import sleep
 import rpc
 import subprocess
@@ -37,6 +38,7 @@ class LocalCommunicationHandler(threading.Thread):
         #password in a text file and return True, else return False
         print 'sent user-id: ' + uid
         print 'sent password: ' + pwd
+        rpc.create_account(self.server_ip, self.server_port, uid, pwd)
         return True
 
     def sign_in(self, uid, pwd):
@@ -60,10 +62,11 @@ class LocalCommunicationHandler(threading.Thread):
         #send a file to be copied to the server
         #uncomplete
         print 'prepare to send: ' + file_name
-        rpc.push_file(self.server_ip, self.server_port, file_name, self.username, self.local_ip, self.local_port)
-        push_process = subprocess.Popen(['scp -P 8001', "test.rtf", "%s@%s: %s" % ("jacob", "localhost", "/Users/xf3da/PycharmProjects/CS3240Project/haha/test.rtf")])
-        status = push_process.wait()
-        print "Push status = " + str(status)
+
+        with open(file_name, "rb") as handle:
+            binary_data = xmlrpclib.Binary(handle.read())
+            rpc.push_file(self.server_ip, self.server_port, file_name, binary_data, self.username, self.local_ip, self.local_port)
+        #print "Push status = " + str(status)
 
 
     def send_deleted_file(self, file_name):
