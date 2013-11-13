@@ -21,6 +21,7 @@ class LocalCommunicationHandler(threading.Thread):
         self.deleted_file_sender = threading.Thread(target=self.delete_files)
         self.server_listener = threading.Thread(target=self.listen)
         self.sync_on = False
+        self.signed_in = False
         self.local_ip = local_ip
         self.local_port = local_port
         self.server_ip = server_ip
@@ -46,10 +47,11 @@ class LocalCommunicationHandler(threading.Thread):
         #if sign in successful, return True; otherwise, return False
         print 'sent user-id: ' + uid
         print 'sent password: ' + pwd
-        print 'server ip: ' + self.server_ip
-        print 'server port: ' + str(self.server_port)
-        rpc.authenticate_user(self.server_ip, self.server_port, self.local_ip, self.local_port, uid, pwd)
-        self.username = uid
+        self.signed_in = rpc.authenticate_user(self.server_ip, self.server_port, self.local_ip, self.local_port, uid, pwd)
+        if self.signed_in:
+            self.username = uid
+        else:
+            print "Sign in unsuccessful for user " + uid
 
     def change_password(self, pwd):
         #send password to server, change password

@@ -31,16 +31,8 @@ def create_account(dest_ip, dest_port, username, user_password):
     rpc_connect.create_new_account(username, user_password)
 
 def authenticate_user(dest_ip, dest_port, source_ip, source_port, username, user_password):
-    print "Server ip: " + dest_ip
-    print "Server port: " + str(dest_port)
-    print 'Source ip: ' + source_ip
-    print 'Source port: ' + str(source_port)
-    print 'Username: ' + username
-    print 'Password: ' + user_password
     rpc_connect = xmlrpclib.ServerProxy("http://%s:%s/"% (dest_ip, dest_port), allow_none = True)
-    print "rpc_connect created"
-    print rpc_connect.system.listMethods()
-    #rpc_connect.sign_in(source_ip, source_port, username, user_password)
+    return rpc_connect.sign_in(source_ip, source_port, username, user_password)
 
 def lock_file(filename, dest_ip, dest_port, source_ip, source_port):
     rpc_connect = xmlrpclib.ServerProxy("http://%s:%s/"% (dest_ip, dest_port), allow_none = True)

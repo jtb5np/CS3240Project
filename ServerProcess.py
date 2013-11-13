@@ -12,7 +12,6 @@ def get_local_ip():
     return current_local_ip
 
 def main():
-
     # TODO: reads configuration file that includes local ip, root dir, etc.
     root_dir = "/Users/xf3da/Desktop/Account Folder"
     server_ip = get_local_ip()
@@ -20,7 +19,11 @@ def main():
 
     #creating communication handler
     account_manager = dbManager(root_dir)
-    server_comm = ServerCommunicationHandler.ServerCommunicationHandler(server_ip, port, account_manager)
+    client_info = dict()
+
+    print client_info
+
+    server_comm = ServerCommunicationHandler.ServerCommunicationHandler(server_ip, port, account_manager, client_info)
 
 
 

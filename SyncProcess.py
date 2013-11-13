@@ -11,7 +11,7 @@ import socket
 
 
 def listen_for_connection(ch):
-    l = multiprocessing.connection.Listener(address=('localhost', 6001))
+    l = multiprocessing.connection.Listener(address=('localhost', 6002))
     connection = l.accept()
     while True:
         try:
@@ -50,7 +50,7 @@ def main():
     server_ip = "172.25.252.97"
     server_port = 8000
     local_ip = "172.25.252.97"
-    local_port = 9000
+    local_port = 9001
 
     lch = LocalCommunicationHandler(server_ip, server_port, local_ip, local_port, files_to_send, files_to_delete,
                                     files_to_receive, deleted_files_to_receive)
