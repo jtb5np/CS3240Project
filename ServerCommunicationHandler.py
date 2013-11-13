@@ -2,34 +2,46 @@ __author__ = 'Jacob and Mark'
 
 import threading
 from Queue import *
+from pwdb import *
+from SimpleXMLRPCServer import SimpleXMLRPCServer, SimpleXMLRPCRequestHandler
 from time import sleep
 
 
 class ServerCommunicationHandler(threading.Thread):
 
-    def __init__(self, q = Queue(), dq = Queue()):
+    def __init__(self, ip, port, account_manager, clients=dict()):
         threading.Thread.__init__(self)
-        self.file_names = q
-        self.deleted_file_names = dq
-        self.file_sender = threading.Thread(target=self.copy_files)
-        self.deleted_file_sender = threading.Thread(target=self.delete_files)
-        self.server_listener = threading.Thread(target=self.listen)
+        self.ip = ip
+        self.port = port
+        self.clients = clients
+        self.authorized = []
+        self.server = None
+        self.start_server()
+        self.account_manager = account_manager
 
-    def run(self):
-        self.file_sender.start()
-        self.deleted_file_sender.start()
-        self.server_listener.start()
+    def start_server(self):
+        self.server = SimpleXMLRPCServer(("0.0.0.0", self.port), allow_none =True)
+        self.server.register_instance(self)
+        self.server.register_introspection_functions()
+        server_wait = threading.Thread(target=self.server.serve_forever)
+        server_wait.start()
+        print "server activated, server alive: " + str(server_wait.isAlive()) + ". Server IP: " + self.ip
 
-    def create_new_account(self, uid, pwd):
+    def create_new_account(self, username, password):
         #create the specified account, send back confirmation of creation
-        print 'sent user-id: ' + uid
-        print 'sent password: ' + pwd
-        return True
+        print 'received user-id: ' + username
+        print 'received password: ' + username
+        self.account_manager.createAccount(username, password, "TestDirName", self.account_manager.serverDirectoryId)
 
-    def change_password(self, id, pwd):
-        #change the password for the specified, send back confirmation of change
-        print 'sent password: ' + pwd
-        return True
+    def sign_in(self, client_ip, client_port, username, user_password):
+        if self.account_manager.loginAccount(username, user_password): # code here should pass arguments to database to authenticate user; if condition here is temporary
+            #self.authorized.append(ClientData(client_ip, client_port))
+            print "Loggin successful for user: " + username + "and the password is " + user_password
+        else:
+            print "Username and password don't match our database"
+            print 'user name: ' + username
+            print 'password: ' + user_password
+            return False
 
     def send_file(self, file_name):
         #send a file to be copied to the local machine
@@ -41,6 +53,7 @@ class ServerCommunicationHandler(threading.Thread):
 
     def listen(self):
         #check for and handle incoming messages from local machine
+        #Mark - not sure we need this method
         print "I'm listening"
 
     def copy_files(self):

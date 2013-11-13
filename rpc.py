@@ -6,10 +6,6 @@ import errno
 import xmlrpclib
 import logging
 
-def push_file(dest_ip, dest_port, filename, filedata, source_username, source_ip, source_port):
-    rpc_connect = xmlrpclib.ServerProxy("http://%s:%s/"% (dest_ip, dest_port), allow_none = True)
-    rpc_connect.receive_file(filename, filedata, source_username, source_ip, source_port)
-
 def find_available(dest_ip, dest_port):
     rpc_connect = xmlrpclib.ServerProxy("http://%s:%s/"% (dest_ip, dest_port), allow_none = True)
     try:
@@ -32,8 +28,7 @@ def create_account(dest_ip, dest_port, username, user_password):
     print "in RPC creat_account"
     rpc_connect = xmlrpclib.ServerProxy("http://%s:%s/"% (dest_ip, dest_port), allow_none = True)
     print "rpc_connect created"
-    rpc_connect.creat_account(username, user_password)
-
+    rpc_connect.create_new_account(username, user_password)
 
 def authenticate_user(dest_ip, dest_port, source_ip, source_port, username, user_password):
     print "Server ip: " + dest_ip
@@ -43,7 +38,9 @@ def authenticate_user(dest_ip, dest_port, source_ip, source_port, username, user
     print 'Username: ' + username
     print 'Password: ' + user_password
     rpc_connect = xmlrpclib.ServerProxy("http://%s:%s/"% (dest_ip, dest_port), allow_none = True)
-    rpc_connect.authenticate_user(source_ip, source_port, username, user_password)
+    print "rpc_connect created"
+    print rpc_connect.system.listMethods()
+    #rpc_connect.sign_in(source_ip, source_port, username, user_password)
 
 def lock_file(filename, dest_ip, dest_port, source_ip, source_port):
     rpc_connect = xmlrpclib.ServerProxy("http://%s:%s/"% (dest_ip, dest_port), allow_none = True)
