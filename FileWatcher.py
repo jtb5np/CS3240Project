@@ -100,7 +100,7 @@ class FileWatcher(threading.Thread):
 
     def delete_local_file(self):
         df = self.incoming_deleted_file_names.get()
-        os.rmdir(self.path_name + df)
+        os.remove(self.path_name + df)
         self.files.remove(df)
         self.incoming_deleted_file_names.task_done()
 

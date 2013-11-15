@@ -42,13 +42,14 @@ class ClientData():
         self.available = False
 
 class Server():
-    def __init__(self, ip, port, clients):
+    def __init__(self, ip, port, clients, base_folder):
         self.ip = ip
         self.port = port
         self.clients = clients
         self.authorized = []
         self.server = None
-        self.account_manager = dbManager("/Users/xf3da/Desktop/Account Folder")
+        self.base_folder = base_folder
+        self.account_manager = dbManager(base_folder)
         print "Account Manager created"
 
     def start_server(self):
@@ -77,14 +78,14 @@ class Server():
             if client_ip == ClientData.ip and client_port == ClientData.port:
                 ClientData.available = True
 
-    def creat_account(self, username, password):
-        self.account_manager.createAccount(username, password, "TestDirName", self.account_manager.serverDirectoryId)
-
+    def create_new_account(self, username, password):
+        return self.account_manager.createAccount(username, password,
+                                                  self.base_folder, self.account_manager.serverDirectoryId)
 
     def authenticate_user(self, client_ip, client_port, username, user_password):
         if self.account_manager.loginAccount(username, user_password): # code here should pass arguments to database to authenticate user; if condition here is temporary
             self.authorized.append(ClientData(client_ip, client_port))
-            print "Loggin successful for user: " + username + "and the password is " + user_password
+            print "Login successful for user: " + username + "and the password is " + user_password
         else:
             print "Username and password don't match our database"
             print 'user name: ' + username
@@ -104,13 +105,20 @@ class Server():
                 rpc_connect = xmlrpclib.ServerProxy("http://%s:%s/"% (client.ip, client.port), allow_none = True)
                 rpc_connect.lock_file_local(filename)
 
-    def receive_file(self, filename, filedata, source_username, source_ip, source_port):
+    def receive_file(self, filename, filedata, user_id):
         path, name = os.path.split(filename)
-
-        #os.makedirs("/Users/xf3da/Desktop/Account Folder/0")
-        with open("/Users/xf3da/Desktop/Account Folder/0/" + name, "wb") as handle:
-            handle.write(filedata.data)
-            return True
+        #use the user_id to find where the file should be stored (within the base folder)
+        file_location = self.base_folder + path
+        try:
+            os.makedirs(file_location)
+        except OSError:
+            print 'that directory already exists!'
+        try:
+            with open(file_location + name, "wb") as handle:
+                handle.write(filedata.data)
+                return True
+        except OSError:
+            return False
 
     def push_file(self, username, client_ip, client_port, filename):
         # receives the file that needs to be updated, and updates the current copy on the server
@@ -138,7 +146,11 @@ def main():
     s.close()
 
     print "current IP address is: " + current_local_ip
-    server = Server(current_local_ip, 8000, get_clients())
+
+    #probably need to put in the right folder name to be able to test everything
+    server = Server(current_local_ip, 8000, get_clients(), '/tmp')
+
+
     print "Starting the server..."
     server.activate()
 

@@ -6,6 +6,8 @@ import xmlrpclib
 from time import sleep
 import rpc
 import subprocess
+from client import Client
+import os
 
 
 class LocalCommunicationHandler(threading.Thread):
@@ -22,6 +24,7 @@ class LocalCommunicationHandler(threading.Thread):
         self.server_listener = threading.Thread(target=self.listen)
         self.sync_on = False
         self.signed_in = False
+        self.client = Client(local_ip, local_port, server_ip, server_port)
         self.local_ip = local_ip
         self.local_port = local_port
         self.server_ip = server_ip
@@ -33,23 +36,32 @@ class LocalCommunicationHandler(threading.Thread):
         self.deleted_file_sender.start()
         self.server_listener.start()
 
+    #should be pretty much complete, need to test
     def create_new_account(self, uid, pwd):
         #send user id and password to server, create account
         #if account is successfully created, store user id and
         #password in a text file and return True, else return False
-        print 'sent user-id: ' + uid
-        print 'sent password: ' + pwd
-        rpc.create_account(self.server_ip, self.server_port, uid, pwd)
-        return True
+        b = self.client.create_new_account(uid, pwd)
+        if b:
+            self.create_account_file(uid, pwd)
+            return True
+        else:
+            return False
 
+    #completed helper method
+    def create_account_file(self, id, password):
+        f = open('account_info.txt', 'w')
+        f.write(id + '\n' + password)
+        f.close()
+
+    #also should be pretty much complete, need to test (also probably get rid of print statements when done)
     def sign_in(self, uid, pwd):
         #send user id and password to server, sign in
         #if sign in successful, return True; otherwise, return False
-        print 'sent user-id: ' + uid
-        print 'sent password: ' + pwd
-        self.signed_in = rpc.authenticate_user(self.server_ip, self.server_port, self.local_ip, self.local_port, uid, pwd)
+        self.signed_in = self.client.login(uid, pwd)
         if self.signed_in:
             self.username = uid
+            print 'Sign in successful'
         else:
             print "Sign in unsuccessful for user " + uid
 
@@ -58,16 +70,26 @@ class LocalCommunicationHandler(threading.Thread):
         #if password is successfully changed, change password in text file and return True
         #else, return False
         print 'sent password: ' + pwd
+        self.change_password_file(pwd)
         return True
 
+    #completed helper method
+    def change_password_file(self, password):
+        f = open('account_info.txt', 'r')
+        id = f.readline()
+        f.close()
+        os.remove('account_info.txt')
+        f2 = open('account_info.txt', 'w')
+        f2.write(id)
+        f2.write(password)
+        f2.close()
+
+    #should be pretty much complete, need to test (definitely delete print statement when done)
     def send_file(self, file_name):
         #send a file to be copied to the server
         #uncomplete
         print 'prepare to send: ' + file_name
-
-        with open(file_name, "rb") as handle:
-            binary_data = xmlrpclib.Binary(handle.read())
-            rpc.push_file(self.server_ip, self.server_port, file_name, binary_data, self.username, self.local_ip, self.local_port)
+        self.client.push_file(file_name)
         #print "Push status = " + str(status)
 
 
