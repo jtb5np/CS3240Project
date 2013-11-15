@@ -47,8 +47,29 @@ class ServerCommunicationHandler(threading.Thread):
             print 'password: ' + user_password
             return False
 
-    def receive_file(self):
-        return True
+    def check_sign_in(self, username, source_ip, source_port):
+        # returns true if client IP and port has already signed in
+        # returns false if otherwise
+        if username in self.clients.keys():
+            for client in self.clients[username]:
+                if client.ip == source_ip and client.port == source_port: #this particular machine has signed in
+                    return True
+            return False
+        else:
+            # examine here whether the username has been registered
+            # if yes, return prompt to sign in
+            # if no, return prompt to register
+            return False
+
+    def receive_file(self, filename, filedata, username, source_ip, source_port):
+        if self.check_sign_in(username, source_ip, source_port): #if the client (IP and Port) has signed in
+            path, name = os.path.split(filename)
+            print path
+            print name
+            #os.makedirs("/Users/xf3da/Desktop/Account Folder/0")
+            with open("/Users/xf3da/Desktop/Account Folder/0/" + name, "wb") as handle:
+                handle.write(filedata.data)
+                return True
 
     def send_file(self, file_name):
         #send a file to be copied to the local machine

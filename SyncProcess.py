@@ -47,9 +47,9 @@ def main():
     fwr = FileWatcher(files_to_send, files_to_delete, files_to_receive, deleted_files_to_receive, name)
 
     #test script
-    server_ip = "172.25.252.97"
-    server_port = 8000
-    local_ip = "172.25.252.97"
+    server_ip = get_local_ip()
+    server_port = 8001
+    local_ip = get_local_ip()
     local_port = 9001
 
     lch = LocalCommunicationHandler(server_ip, server_port, local_ip, local_port, files_to_send, files_to_delete,
@@ -59,12 +59,18 @@ def main():
     lch.start()
     #lch.create_new_account("mark", "markspassword")
     lch.sign_in("mark", "markspassword")
-    #lch.send_file("/Users/xf3da/Desktop/testfile.rtf")
+    lch.send_file("/Users/xf3da/Desktop/testfile.rtf")
 
 
     listener_thread.start()
 
 
+def get_local_ip():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.connect(("gmail.com",80))
+    current_local_ip = s.getsockname()[0]
+    s.close()
+    return current_local_ip
 
 if __name__=='__main__':
     main()

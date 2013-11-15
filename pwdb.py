@@ -6,15 +6,15 @@ class dbManager:
 
     def __init__(self, rootPath):
         self.rootPath = rootPath+'/'
-        #self.serverDirectoryId = self.get_subdirs(self.rootPath)
-        self.serverDirectoryId = 0
+        self.serverDirectoryId = self.get_subdirs(self.rootPath)
+        #self.serverDirectoryId = 0
         if not os.path.isfile(self.rootPath+'passwords.db'):
             self.conn = sqlite3.connect(self.rootPath+'passwords.db')
             self.c = self.conn.cursor()
             self.c.execute('''CREATE TABLE user (user_name TEXT PRIMARY KEY, password TEXT, salt TEXT, directory_name TEXT, serverId INTEGER)''')
 
     #creating Account:
-    def createAccount(self, user_name, password, directory_name, serverDirectoryId):
+    def createAccount(self, user_name, password, directory_name):
         #need to check if account details do not already exist
         self.conn = sqlite3.connect(self.rootPath+'passwords.db')
         self.conn.text_factory = str
@@ -27,10 +27,10 @@ class dbManager:
             salt = os.urandom(15)
             hashed_pw = hashlib.sha512(password+salt).hexdigest()
             #insert user details, hashed PW, and salt into DB
-            self.c.execute('''INSERT INTO user (user_name, password, salt, directory_name, serverId) VALUES (?, ?, ?, ?, ?)''',(user_name, hashed_pw, salt, directory_name, serverDirectoryId))
+            self.c.execute('''INSERT INTO user (user_name, password, salt, directory_name, serverId) VALUES (?, ?, ?, ?, ?)''',(user_name, hashed_pw, salt, directory_name, self.serverDirectoryId))
             self.conn.commit()
             #create user directory on server
-            newPath = self.rootPath+`serverDirectoryId`
+            newPath = self.rootPath+`self.serverDirectoryId`
             if not os.path.exists(newPath): os.makedirs(newPath)
             #increment server id
             self.serverDirectoryId += 1
@@ -56,6 +56,19 @@ class dbManager:
                 #sucess
                 return True
         return False
+
+    #given a user, returns a complete path to that user's directory on the server
+    def getAccountDirectory(self, user_name):
+        self.conn = sqlite3.connect(self.rootPath+'passwords.db')
+        self.conn.text_factory = str
+        self.c = self.conn.cursor()
+        self.c.execute('''SELECT serverId FROM user WHERE user_name=?''', (user_name,))
+        attemptedUser = self.c.fetchall()
+        if len(attemptedUser) == 1:
+            result = attemptedUser[0]
+            account_directory = result[0]
+            return self.rootPath+"/"+account_directory
+        return "No such user"
 
     #counts number of files within a directory
     def fcount(self, path):

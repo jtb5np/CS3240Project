@@ -15,7 +15,7 @@ def main():
     # TODO: reads configuration file that includes local ip, root dir, etc.
     root_dir = "/Users/xf3da/Desktop/Account Folder"
     server_ip = get_local_ip()
-    port = 8000
+    port = 8001
 
     #creating communication handler
     account_manager = dbManager(root_dir)
