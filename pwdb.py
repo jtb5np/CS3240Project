@@ -67,7 +67,7 @@ class dbManager:
         if len(attemptedUser) == 1:
             result = attemptedUser[0]
             account_directory = result[0]
-            return self.rootPath+"/"+account_directory
+            return self.rootPath + str(account_directory)
         return "No such user"
 
     #counts number of files within a directory

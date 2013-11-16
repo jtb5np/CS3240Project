@@ -5,6 +5,7 @@ from Queue import *
 from pwdb import *
 from SimpleXMLRPCServer import SimpleXMLRPCServer, SimpleXMLRPCRequestHandler
 from time import sleep
+import xmlrpclib
 
 
 
@@ -64,25 +65,31 @@ class ServerCommunicationHandler(threading.Thread):
     def receive_file(self, filename, filedata, username, source_ip, source_port):
         if self.check_sign_in(username, source_ip, source_port): #if the client (IP and Port) has signed in
             path, name = os.path.split(filename)
-            print path
-            print name
-            #os.makedirs("/Users/xf3da/Desktop/Account Folder/0")
-            with open("/Users/xf3da/Desktop/Account Folder/0/" + name, "wb") as handle:
+            print "Path: " + path
+            print "Name: " + name
+            print "Username: " + username
+            user_root_dir = self.account_manager.getAccountDirectory(username)
+            print "user_root = " + user_root_dir
+            if not os.path.exists(user_root_dir + path): os.makedirs(user_root_dir + path)
+            with open(user_root_dir + filename, "wb") as handle:
                 handle.write(filedata.data)
                 return True
 
-    def send_file(self, file_name):
+    def send_file(self, filename, username, client_ip, client_port):
         #send a file to be copied to the local machine
-        print 'sent: ' + file_name
+        # authenticate user
+        if self.check_sign_in(username, client_ip, client_port): # if signed in
+            with open(filename, "rb") as handle:
+                binary_data = xmlrpclib.Binary(handle.read())
+                print "File " + filename + "sent to " + client_ip
+                return (True, binary_data)
+        else:
+            return (False, "ERROR: haha you are not sign in, I wonder why you are not getting your file...")
+
 
     def send_deleted_file(self, file_name):
         #send a file to be deleted from the local machine
         print 'sent to be deleted: ' + file_name
-
-    def listen(self):
-        #check for and handle incoming messages from local machine
-        #Mark - not sure we need this method
-        print "I'm listening"
 
     def copy_files(self):
         while True:

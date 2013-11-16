@@ -3,16 +3,19 @@ __author__ = 'xf3da'
 import time
 import rpc
 import subprocess
-import xmlrpclib.Binary
+from xmlrpclib import *
+import xmlrpclib
+import os
 
 
 class Client():
-    def __init__(self, ip, port, server_ip, server_port):
+    def __init__(self, ip, port, server_ip, server_port, username):
         self.ip = ip
-        self.port = port
+        self.port = 8001
         self.server_ip = server_ip
         self.server_port = server_port
         self.server_available = True
+        self.username = username
 
     def mark_presence(self):
         print "in mark_presence"
@@ -20,7 +23,11 @@ class Client():
 
     def login(self, uid, pwd):
         print "log in in process"
-        rpc.authenticate_user(self.server_ip, self.server_port, self.ip, self.port, uid, pwd)
+        if rpc.authenticate_user(self.server_ip, self.server_port, self.ip, self.port, uid, pwd):
+            self.username = uid
+            print "log in successful for user " + uid
+        else:
+            print "log in unsuccessful, please retry"
 
     def push_file(self, filename):
         # this method push the modified/new file to the server
@@ -29,8 +36,25 @@ class Client():
             rpc.push_file(filename, binary_data, self.server_ip, self.server_port, self.username, self.ip, self.port)
         #subprocess.Popen('')
 
+    def pull_file_from_server(self, filename):
+        # when a file on the server is updated, the server send a msg to the client requesting it to pull the said file
+        # this method takes in the filename, and use rpc to request updated file
+        filedata = rpc.pull_file_from_server(self.server_ip, self.server_port, filename, self.username, self.ip, self.port)
+        if filedata[0] == True: # if file was sent back successfully
+            print "File received. "
+            path, name = os.path.split(filename)
+            print "Path: " + path
+            print "Name: " + name
+            if not os.path.exists(path): os.makedirs(path)
+            with open(filename, "wb") as handle:
+                handle.write(filedata[1].data)
+                handle.close()
+                return True
+        else:
+            print filedata[1]
+
     def lock_file(self, filename, dest_ip, dest_port):
-        # this method notifies the server to lock files being edited ==> so the detector will need to tell what files are being edited
+        # this method notifies the server to lock files being edited ==> so the detector will need to tell what files are being edited ==> yep. is there a way to do that? - Mark
         print "file being edited"
 
     def lock_file_local(self, filename):

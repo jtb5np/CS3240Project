@@ -24,12 +24,13 @@ class LocalCommunicationHandler(threading.Thread):
         self.server_listener = threading.Thread(target=self.listen)
         self.sync_on = False
         self.signed_in = False
-        self.client = Client(local_ip, local_port, server_ip, server_port)
+        self.username = None
+        self.client = Client(local_ip, local_port, server_ip, server_port, self.username)
         self.local_ip = local_ip
         self.local_port = local_port
         self.server_ip = server_ip
         self.server_port = server_port
-        self.username = None
+
 
     def run(self):
         self.file_sender.start()
@@ -92,10 +93,12 @@ class LocalCommunicationHandler(threading.Thread):
         self.client.push_file(file_name)
         #print "Push status = " + str(status)
 
-
     def send_deleted_file(self, file_name):
         #send a file to be deleted from the server
         print 'sent to be deleted: ' + file_name
+
+    def pull_file(self, filename):
+        self.client.pull_file_from_server(filename)
 
     def listen(self):
         #check for and handle incoming messages from server

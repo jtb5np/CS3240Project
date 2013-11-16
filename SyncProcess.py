@@ -59,7 +59,7 @@ def main():
     lch.start()
     #lch.create_new_account("mark", "markspassword")
     lch.sign_in("mark", "markspassword")
-    lch.send_file("/Users/xf3da/Desktop/testfile.rtf")
+    lch.pull_file("/Users/xf3da/Desktop/testfile.rtf")
 
 
     listener_thread.start()
