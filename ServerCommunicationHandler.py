@@ -71,9 +71,14 @@ class ServerCommunicationHandler(threading.Thread):
             user_root_dir = self.account_manager.getAccountDirectory(username)
             print "user_root = " + user_root_dir
             if not os.path.exists(user_root_dir + path): os.makedirs(user_root_dir + path)
-            with open(user_root_dir + filename, "wb") as handle:
-                handle.write(filedata.data)
-                return True
+            try:
+                with open(user_root_dir + filename, "wb") as handle:
+                    handle.write(filedata.data)
+                    return (True, "File received by the server")
+            except:
+                return (False, "File received but encountered a problem when writing the file onto storage")
+        else:
+            return (False, "User not logged in")
 
     def send_file(self, filename, username, client_ip, client_port):
         #send a file to be copied to the local machine

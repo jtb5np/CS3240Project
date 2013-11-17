@@ -12,7 +12,7 @@ import os
 
 class LocalCommunicationHandler(threading.Thread):
 
-    def __init__(self, server_ip, server_port, local_ip, local_port, q=Queue(), dq=Queue(),
+    def __init__(self, server_ip, server_port, local_ip, local_port, root_folder, q=Queue(), dq=Queue(),
                  iq=Queue(), idq=Queue()):
         threading.Thread.__init__(self)
         self.file_names = q
@@ -22,10 +22,10 @@ class LocalCommunicationHandler(threading.Thread):
         self.file_sender = threading.Thread(target=self.copy_files)
         self.deleted_file_sender = threading.Thread(target=self.delete_files)
         self.server_listener = threading.Thread(target=self.listen)
-        self.sync_on = False
+        self.sync_on = True
         self.signed_in = False
         self.username = None
-        self.client = Client(local_ip, local_port, server_ip, server_port, self.username)
+        self.client = Client(local_ip, local_port, server_ip, server_port, self.username, root_folder)
         self.local_ip = local_ip
         self.local_port = local_port
         self.server_ip = server_ip
@@ -90,8 +90,9 @@ class LocalCommunicationHandler(threading.Thread):
         #send a file to be copied to the server
         #uncomplete
         print 'prepare to send: ' + file_name
-        self.client.push_file(file_name)
-        #print "Push status = " + str(status)
+        status = self.client.push_file(file_name)
+        print status[1]
+        return status[0]
 
     def send_deleted_file(self, file_name):
         #send a file to be deleted from the server
@@ -106,9 +107,13 @@ class LocalCommunicationHandler(threading.Thread):
 
     def copy_files(self):
         while True:
+            sleep(1)
+            print self.sync_on
             if self.sync_on:
+                print self.file_names
                 name = self.file_names.get()
-                if self.sync_on:
+                print name
+                if self.sync_on: # why the second time?
                     self.send_file(name)
                 else:
                     self.file_names.put(name)

@@ -9,13 +9,14 @@ import os
 
 
 class Client():
-    def __init__(self, ip, port, server_ip, server_port, username):
+    def __init__(self, ip, port, server_ip, server_port, username, root_folder):
         self.ip = ip
         self.port = 8001
         self.server_ip = server_ip
         self.server_port = server_port
         self.server_available = True
         self.username = username
+        self.root_folder = root_folder
 
     def mark_presence(self):
         print "in mark_presence"
@@ -32,9 +33,9 @@ class Client():
     def push_file(self, filename):
         # this method push the modified/new file to the server
         with open(filename, "rb") as handle:
+            print filename
             binary_data = xmlrpclib.Binary(handle.read())
-            rpc.push_file(filename, binary_data, self.server_ip, self.server_port, self.username, self.ip, self.port)
-        #subprocess.Popen('')
+            return rpc.push_file(filename, binary_data, self.server_ip, self.server_port, self.username, self.ip, self.port)
 
     def pull_file_from_server(self, filename):
         # when a file on the server is updated, the server send a msg to the client requesting it to pull the said file
