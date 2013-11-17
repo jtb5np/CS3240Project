@@ -20,6 +20,7 @@ def push_file(server_ip, server_port, file_name, filedata, username, source_ip, 
 
 def pull_file_from_server(server_ip, server_port, file_name, username, client_ip, client_port):
     rpc_connect = xmlrpclib.ServerProxy("http://%s:%s/"% (server_ip, server_port), allow_none = True)
+    print "RPC connect created"
     return rpc_connect.send_file(file_name, username, client_ip, client_port)
 
 

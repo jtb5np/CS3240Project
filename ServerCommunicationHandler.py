@@ -79,7 +79,7 @@ class ServerCommunicationHandler(threading.Thread):
         #send a file to be copied to the local machine
         # authenticate user
         if self.check_sign_in(username, client_ip, client_port): # if signed in
-            with open(filename, "rb") as handle:
+            with open(self.account_manager.getAccountDirectory(username) + filename, "rb") as handle:
                 binary_data = xmlrpclib.Binary(handle.read())
                 print "File " + filename + "sent to " + client_ip
                 return (True, binary_data)

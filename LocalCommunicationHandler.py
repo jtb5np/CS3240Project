@@ -128,5 +128,6 @@ class LocalCommunicationHandler(threading.Thread):
         self.incoming_deleted_files.put(name)
 
     def modify_local_files(self, f_name, f_data):
+        print f_name
         print "I do not know what to do"
 

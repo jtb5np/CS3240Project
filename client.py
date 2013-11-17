@@ -48,8 +48,8 @@ class Client():
             if not os.path.exists(path): os.makedirs(path)
             with open(filename, "wb") as handle:
                 handle.write(filedata[1].data)
-                handle.close()
-                return True
+            handle.close()
+            return True
         else:
             print filedata[1]
 

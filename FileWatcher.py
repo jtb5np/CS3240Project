@@ -22,7 +22,8 @@ class FileWatcher(threading.Thread):
     def run(self):
         while True:
             self.find_all_files()
-            self.update_local_files()
+            #self.update_local_files()#not sure if we want to handle file updating task here?
+            sleep(1)
 
     def find_modified_files(self):
         mod_files = []
