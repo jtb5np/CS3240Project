@@ -19,8 +19,7 @@ class LocalCommunicationHandler(threading.Thread):
         self.deleted_file_names = dq
         self.incoming_file_names = iq
         self.incoming_deleted_files = idq
-        self.file_sender = threading.Thread(target=self.copy_files)
-        self.deleted_file_sender = threading.Thread(target=self.delete_files)
+        self.file_sender = threading.Thread(target=self.sync_files)
         self.server_listener = threading.Thread(target=self.listen)
         self.sync_on = True
         self.signed_in = False
@@ -34,7 +33,6 @@ class LocalCommunicationHandler(threading.Thread):
 
     def run(self):
         self.file_sender.start()
-        self.deleted_file_sender.start()
         self.server_listener.start()
 
     #should be pretty much complete, need to test
@@ -107,29 +105,37 @@ class LocalCommunicationHandler(threading.Thread):
         #check for and handle incoming messages from server
         print "I'm listening"
 
-    def copy_files(self):
+    def sync_files(self):
         while True:
-            sleep(1)
-            print self.sync_on
-            if self.sync_on:
-                print self.file_names
-                name = self.file_names.get()
-                print name
+            self.copy_files()
+            self.delete_files()
+
+    def copy_files(self):
+        sleep(1)
+        if self.sync_on:
+            print self.file_names
+            try:
+                name = self.file_names.get(True, .1)
                 if self.sync_on: # why the second time?
                     self.send_file(name)
                 else:
                     self.file_names.put(name)
-                self.file_names.task_done()
+                    self.file_names.task_done()
+            except Empty:
+                pass
+
 
     def delete_files(self):
-        while True:
-            if self.sync_on:
-                name = self.deleted_file_names.get()
+        if self.sync_on:
+            try:
+                name = self.deleted_file_names.get(True, .1)
                 if self.sync_on:
                     self.send_deleted_file(name)
                 else:
                     self.deleted_file_names.put(name)
                 self.deleted_file_names.task_done()
+            except Empty:
+                pass
 
     def delete_local_files(self, name):
         self.incoming_deleted_files.put(name)
