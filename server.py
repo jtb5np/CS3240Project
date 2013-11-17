@@ -136,6 +136,16 @@ class Server():
         #print "Server status: self.server.stop = " + str(self.server.stop)
         #self.find_available_clients()
 
+    def delete_file(self, filename, username):
+        #use the user_id to find where the file should be stored (within the base folder)
+        total_file_name = self.base_folder + filename
+        try:
+            os.remove(total_file_name)
+            return True
+        except OSError:
+            return False
+
+
 
 def main():
 

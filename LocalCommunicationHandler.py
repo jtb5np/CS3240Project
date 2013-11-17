@@ -97,6 +97,8 @@ class LocalCommunicationHandler(threading.Thread):
     def send_deleted_file(self, file_name):
         #send a file to be deleted from the server
         print 'sent to be deleted: ' + file_name
+        status = self.client.delete_file(file_name)
+        return status[0]
 
     def pull_file(self, filename):
         self.client.pull_file_from_server(filename)

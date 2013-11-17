@@ -65,6 +65,9 @@ class Client():
     def create_new_account(self, uid, pwd):
         return rpc.create_account(self.server_ip, self.server_port, uid, pwd)
 
+    def delete_file(self, filename):
+        return rpc.delete_file(filename, self.server_ip, self.server_port, self.username, self.ip, self.port)
+
     def activate(self):
         print "in activate"
         self.mark_presence()
