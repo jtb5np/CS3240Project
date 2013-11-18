@@ -1,6 +1,3 @@
-import Log
-import LogEntry
-
 __author__ = 'Jacob and Mark'
 
 import threading
@@ -9,7 +6,9 @@ from pwdb import *
 from SimpleXMLRPCServer import SimpleXMLRPCServer, SimpleXMLRPCRequestHandler
 from time import sleep
 import xmlrpclib
-
+import shutil
+import Log
+import LogEntry
 
 
 class ClientData():
@@ -27,10 +26,11 @@ class ServerCommunicationHandler(threading.Thread):
         self.server = None
         self.start_server()
         self.account_manager = account_manager
+        self.username_file_ip = dict()
         self.log = Log
         entry = LogEntry.__init__("Admin", "Created Server")
         self.log.addEntry(entry)
-
+        
     def create_new_account(self, username, password):
         #create the specified account, send back confirmation of creation
         print 'received user-id: ' + username
@@ -40,8 +40,8 @@ class ServerCommunicationHandler(threading.Thread):
         self.account_manager.createAccount(username, password, "TestDirName", self.account_manager.serverDirectoryId)
 
     def sign_in(self, client_ip, client_port, username, user_password):
+        
         if self.account_manager.loginAccount(username, user_password): #if the login was successful
-
             entry = LogEntry.__init__(username, "Logged In")
             self.log.addEntry(entry)
             if username in self.clients:#if the same username has already logged in from other ip/port
@@ -75,25 +75,35 @@ class ServerCommunicationHandler(threading.Thread):
 
     def receive_file(self, filename, filedata, username, source_ip, source_port):
         if self.check_sign_in(username, source_ip, source_port): #if the client (IP and Port) has signed in
-            entry = LogEntry.__init__("Server", "Received File From " + source_ip)
-            self.log.addEntry(entry)
             path, name = os.path.split(filename)
             print "Path: " + path
             print "Name: " + name
             print "Username: " + username
             user_root_dir = self.account_manager.getAccountDirectory(username)
-            print "user_root = " + user_root_dir
+            print "user_root = " + `user_root_dir`
             if not os.path.exists(user_root_dir + path): os.makedirs(user_root_dir + path)
-            with open(user_root_dir + filename, "wb") as handle:
-                handle.write(filedata.data)
-                return True
+            try:
+                with open(user_root_dir + filename, "wb") as handle:
+                    handle.write(filedata.data)
+                    return (True, "File received by the server")
+            except:
+                return (False, "File received but encountered a problem when writing the file onto storage")
+        else:
+            return (False, "User not logged in")
+
+    def receive_folder(self, folder_name, username, source_ip, source_port):
+        if self.check_sign_in(username, source_ip, source_port): #if the client (IP and Port) has signed in
+            user_root_dir = self.account_manager.getAccountDirectory(username)
+            print "user_root = " + `user_root_dir`
+            if not os.path.exists(user_root_dir + folder_name):
+                return os.mkdirs(user_root_dir + folder_name)
+            else: return False
+        else: return False
 
     def send_file(self, filename, username, client_ip, client_port):
-        #send a file to be copied to the local machine
+        #send a file to be copied to the local  machine
         # authenticate user
         if self.check_sign_in(username, client_ip, client_port): # if signed in
-            entry = LogEntry.__init__(username, "Sent File to " + client_ip)
-            self.log.addEntry(entry)
             with open(self.account_manager.getAccountDirectory(username) + filename, "rb") as handle:
                 binary_data = xmlrpclib.Binary(handle.read())
                 print "File " + filename + "sent to " + client_ip
@@ -112,11 +122,13 @@ class ServerCommunicationHandler(threading.Thread):
             self.send_file(name)
             self.file_names.task_done()
 
-    def delete_files(self):
-        while True:
-            name = self.deleted_file_names.get()
-            self.send_deleted_file(name)
-            self.deleted_file_names.task_done()
+    def remove_folder(self, folder_name, username):
+        total_folder_name = self.account_manager.getAccountDirectory(username) + folder_name
+        if os.path.exists(total_folder_name):
+            os.rmdir(total_folder_name)
+            return True
+        else:
+            return False
 
     def get_user_information(self,user_name):
         size_files = self.account_manager.adminFindFileSize(user_name)
@@ -142,3 +154,24 @@ class ServerCommunicationHandler(threading.Thread):
         entry = LogEntry.__init__("Admin", "Started Server")
         self.log.addEntry(entry)
         print "server activated, server alive: " + str(server_wait.isAlive()) + ". Server IP: " + self.ip
+
+    def delete_file(self, filename, username):
+        #use the user_id to find where the file should be stored (within the base folder)
+        print filename
+        print username
+        total_file_name = self.account_manager.getAccountDirectory(username) + filename
+        print "Total_file_name = " + total_file_name
+        try:
+            if os.path.isdir(total_file_name):
+                print "Trying to remove folder" + total_file_name
+                shutil.rmtree(total_file_name)
+                print "YAY Folder Removed"
+                return True
+            else:
+                print "Trying to remove file" + total_file_name
+                os.remove(total_file_name)
+                print "YAY File removed"
+                return False
+        except OSError:
+            print "Nope dude"
+            return False

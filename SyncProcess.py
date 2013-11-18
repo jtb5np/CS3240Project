@@ -51,7 +51,7 @@ def main():
 
     #test script
     server_ip = "172.25.203.169"
-    server_port = 8001
+    server_port = 8002
     local_ip = get_local_ip()
 
     lch = LocalCommunicationHandler(server_ip, server_port, local_ip, local_port, root_folder, files_to_send, files_to_delete,
