@@ -82,7 +82,7 @@ class dbManager:
         attemptedUser = self.c.fetchall()
         if len(attemptedUser) == 1:
             result = attemptedUser[0]
-            account_directory = result[0]
+            account_directory = str(result[0])
             return self.rootPath+account_directory + '/'
         return "No such user"
 

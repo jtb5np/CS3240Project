@@ -58,3 +58,7 @@ def delete_file(filename, dest_ip, dest_port, source_username, source_ip, source
 def push_folder(folder_name, dest_ip, dest_port, source_username, source_ip, source_port):
     rpc_connect = xmlrpclib.ServerProxy("http://%s:%s/"% (dest_ip, dest_port), allow_none = True)
     return rpc_connect.receive_folder(folder_name, source_username, source_ip, source_port)
+
+def delete_folder(folder_name, dest_ip, dest_port, source_username, source_ip, source_port):
+    rpc_connect = xmlrpclib.ServerProxy("http://%s:%s/"% (dest_ip, dest_port), allow_none = True)
+    return rpc_connect.remove_folder(folder_name, source_username)
