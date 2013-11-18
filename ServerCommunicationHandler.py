@@ -6,6 +6,7 @@ from pwdb import *
 from SimpleXMLRPCServer import SimpleXMLRPCServer, SimpleXMLRPCRequestHandler
 from time import sleep
 import xmlrpclib
+import shutil
 
 
 
@@ -24,6 +25,7 @@ class ServerCommunicationHandler(threading.Thread):
         self.server = None
         self.start_server()
         self.account_manager = account_manager
+        self.username_file_ip = dict()
 
     def create_new_account(self, username, password):
         #create the specified account, send back confirmation of creation
@@ -32,6 +34,7 @@ class ServerCommunicationHandler(threading.Thread):
         self.account_manager.createAccount(username, password, "TestDirName", self.account_manager.serverDirectoryId)
 
     def sign_in(self, client_ip, client_port, username, user_password):
+        print "In Sign In"
         if self.account_manager.loginAccount(username, user_password): #if the login was successful
             if username in self.clients:#if the same username has already logged in from other ip/port
                 print "User " + username + " has logged in from other IP address, but hey you can still join using this IP!"
@@ -65,27 +68,38 @@ class ServerCommunicationHandler(threading.Thread):
     def receive_file(self, filename, filedata, username, source_ip, source_port):
         if self.check_sign_in(username, source_ip, source_port): #if the client (IP and Port) has signed in
             path, name = os.path.split(filename)
-            print "Path: " + path
-            print "Name: " + name
-            print "Username: " + username
             user_root_dir = self.account_manager.getAccountDirectory(username)
-            print "user_root = " + `user_root_dir`
             if not os.path.exists(user_root_dir + path): os.makedirs(user_root_dir + path)
             try:
                 with open(user_root_dir + filename, "wb") as handle:
                     handle.write(filedata.data)
-                    return (True, "File received by the server")
+                if username not in self.username_file_ip.keys(): # if the user doesn't exist
+                    print "In receive_file: new user"
+                    file_ip = dict()
+                    file_ip[filename] = (source_ip, source_port)
+                    self.username_file_ip[username] = file_ip
+                else:
+                    if filename not in self.username_file_ip[username].keys(): # if this is a new file for the user
+                        print "In receive_file: old user, new file"
+                        (self.username_file_ip[username])[filename] = (source_ip, source_port)
+                    else: # if this is a modified file
+                        print "In receive_file: old user, old file"
+                        (self.username_file_ip[username])[filename] = (source_ip, source_port)
+                return True
             except:
-                return (False, "File received but encountered a problem when writing the file onto storage")
+                return False
         else:
-            return (False, "User not logged in")
+            return False
 
     def receive_folder(self, folder_name, username, source_ip, source_port):
         if self.check_sign_in(username, source_ip, source_port): #if the client (IP and Port) has signed in
             user_root_dir = self.account_manager.getAccountDirectory(username)
             print "user_root = " + `user_root_dir`
             if not os.path.exists(user_root_dir + folder_name):
-                return os.mkdirs(user_root_dir + folder_name)
+                file_ip = dict()
+                file_ip[folder_name] = (source_ip, source_port)
+                self.username_file_ip[username] = file_ip
+                return os.makedirs(user_root_dir + folder_name)
             else: return False
         else: return False
 
@@ -134,9 +148,16 @@ class ServerCommunicationHandler(threading.Thread):
         total_file_name = self.account_manager.getAccountDirectory(username) + filename
         print "Total_file_name = " + total_file_name
         try:
-            os.remove(total_file_name)
-            print "YAY"
-            return True
+            if os.path.isdir(total_file_name):
+                print "Trying to remove folder" + total_file_name
+                shutil.rmtree(total_file_name)
+                print "YAY Folder Removed"
+                return True
+            else:
+                print "Trying to remove file" + total_file_name
+                os.remove(total_file_name)
+                print "YAY File removed"
+                return False
         except OSError:
             print "Nope dude"
             return False
