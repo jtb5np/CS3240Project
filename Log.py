@@ -26,22 +26,7 @@ class Log:
             x.printLogEntry()
 
 
-    def getActivity(self,type):
-
-        results = []
-
-        for x in self.log[0,len[self.log]]:
-
-            if self.log[x].getType is type:
-
-                results.append(self.log[x])
-
-        for x in results[0,len(results)]:
-
-            print results[x]
-
-
-    def getActivity(self,actor):
+    def get_actor_activity(self,actor):
 
         results = []
 
@@ -56,7 +41,7 @@ class Log:
             print results[x]
 
 
-    def getActivity(self,startTime, endTime):
+    def get_time_activity(self,startTime, endTime):
 
         results = []
 
