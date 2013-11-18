@@ -118,6 +118,21 @@ class ServerCommunicationHandler(threading.Thread):
             self.send_deleted_file(name)
             self.deleted_file_names.task_done()
 
+    def get_user_information(self,user_name):
+        size_files = self.account_manager.adminFindFileSize(user_name)
+        num_files = self.account_manager.adminFindFileNum(user_name)
+        account_dir = self.account_manager.getAccountDirectory(user_name)
+
+        print "User: " + user_name + " has " + num_files + " files totaling " + size_files + " bits in " + account_dir
+
+    def get_system_information(self):
+        size_files = self.account_manager.get_size(self.server.base_folder)
+        num_files = self.account_manager.fcount(self.server.base_folder)
+        num_users = self.account_manager.serverDirectoryId
+
+        print "System has " + num_files + " files totaling " + size_files + " bits between " + num_users + " users"
+
+
     def start_server(self):
         self.server = SimpleXMLRPCServer((self.ip, self.port), allow_none =True)
         self.server.register_instance(self)
