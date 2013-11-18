@@ -89,8 +89,7 @@ class LocalCommunicationHandler(threading.Thread):
         #uncomplete
         print 'prepare to send: ' + file_name
         status = self.client.push_file(file_name)
-        print status[1]
-        return status[0]
+        return status
 
     def send_deleted_file(self, file_name):
         #send a file to be deleted from the server
