@@ -70,7 +70,11 @@ class Client():
         return rpc.create_account(self.server_ip, self.server_port, uid, pwd)
 
     def delete_file(self, filename):
-        return rpc.delete_file(filename, self.server_ip, self.server_port, self.username, self.ip, self.port)
+        if os.path.isdir(filename):
+            print 'is a folder'
+            return rpc.delete_folder(filename, self.server_ip, self.server_port, self.username, self.ip, self.port)
+        else:
+            return rpc.delete_file(filename, self.server_ip, self.server_port, self.username, self.ip, self.port)
 
     def activate(self):
         print "in activate"
