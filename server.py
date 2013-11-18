@@ -1,6 +1,3 @@
-import Log
-import LogEntry
-
 __author__ = 'xf3da'
 
 import xmlrpclib
@@ -66,9 +63,6 @@ class Server():
         server_wait.start()
         print "server activated, server alive: " + str(server_wait.isAlive())
         #server_wait._Thread__stop()
-        Log.__init__()
-        entry = LogEntry("Server", "Server Created", )
-        Log.addEntry(entry)
 
     def find_available_clients(self):
         for client in self.clients:
@@ -141,31 +135,6 @@ class Server():
         #self.server.force_stop()
         #print "Server status: self.server.stop = " + str(self.server.stop)
         #self.find_available_clients()
-
-    def retrieve_user_info(self, user_name):
-        dir_path = self.account_manager.getAccountDirectory(user_name)
-        file_num = self.account_manager.AdminFindFileNum(user_name)
-        dir_size = self.account_manager.get_size(dir_path)
-
-        if (dir_path is not "No such user"):
-
-            print user_name + " owns " + file_num + " files at " + dir_path
-            print "Total number of bits in " + dir_path + " is " + dir_size
-
-        else:
-
-            print "No such user"
-
-
-    def retrieve_server_info(self):
-        num_sub_dir = self.account_manager.get_subdirs(self.base_folder)
-        file_num = self.account_manager.fcount(self.base_folder)
-        server_size = self.account_manager.get_size(self.base_folder)
-
-        print "Server has " + num_sub_dir + " subdirectories"
-        print "Server has " + file_num + " files"
-        print "Total Server size is " + server_size + " bits"
-
 
 
 def main():

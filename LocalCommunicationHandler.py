@@ -12,20 +12,19 @@ import os
 
 class LocalCommunicationHandler(threading.Thread):
 
-    def __init__(self, server_ip, server_port, local_ip, local_port, q=Queue(), dq=Queue(),
+    def __init__(self, server_ip, server_port, local_ip, local_port, root_folder, q=Queue(), dq=Queue(),
                  iq=Queue(), idq=Queue()):
         threading.Thread.__init__(self)
         self.file_names = q
         self.deleted_file_names = dq
         self.incoming_file_names = iq
         self.incoming_deleted_files = idq
-        self.file_sender = threading.Thread(target=self.copy_files)
-        self.deleted_file_sender = threading.Thread(target=self.delete_files)
+        self.file_sender = threading.Thread(target=self.sync_files)
         self.server_listener = threading.Thread(target=self.listen)
-        self.sync_on = False
+        self.sync_on = True
         self.signed_in = False
         self.username = None
-        self.client = Client(local_ip, local_port, server_ip, server_port, self.username)
+        self.client = Client(local_ip, local_port, server_ip, server_port, self.username, root_folder)
         self.local_ip = local_ip
         self.local_port = local_port
         self.server_ip = server_ip
@@ -34,7 +33,6 @@ class LocalCommunicationHandler(threading.Thread):
 
     def run(self):
         self.file_sender.start()
-        self.deleted_file_sender.start()
         self.server_listener.start()
 
     #should be pretty much complete, need to test
@@ -90,12 +88,15 @@ class LocalCommunicationHandler(threading.Thread):
         #send a file to be copied to the server
         #uncomplete
         print 'prepare to send: ' + file_name
-        self.client.push_file(file_name)
-        #print "Push status = " + str(status)
+        status = self.client.push_file(file_name)
+        print status[1]
+        return status[0]
 
     def send_deleted_file(self, file_name):
         #send a file to be deleted from the server
         print 'sent to be deleted: ' + file_name
+        status = self.client.delete_file(file_name)
+        return status
 
     def pull_file(self, filename):
         self.client.pull_file_from_server(filename)
@@ -104,25 +105,37 @@ class LocalCommunicationHandler(threading.Thread):
         #check for and handle incoming messages from server
         print "I'm listening"
 
-    def copy_files(self):
+    def sync_files(self):
         while True:
-            if self.sync_on:
-                name = self.file_names.get()
-                if self.sync_on:
+            self.copy_files()
+            self.delete_files()
+
+    def copy_files(self):
+        sleep(1)
+        if self.sync_on:
+            print self.file_names
+            try:
+                name = self.file_names.get(True, .1)
+                if self.sync_on: # why the second time?
                     self.send_file(name)
                 else:
                     self.file_names.put(name)
-                self.file_names.task_done()
+                    self.file_names.task_done()
+            except Empty:
+                pass
+
 
     def delete_files(self):
-        while True:
-            if self.sync_on:
-                name = self.deleted_file_names.get()
+        if self.sync_on:
+            try:
+                name = self.deleted_file_names.get(True, .1)
                 if self.sync_on:
                     self.send_deleted_file(name)
                 else:
                     self.deleted_file_names.put(name)
                 self.deleted_file_names.task_done()
+            except Empty:
+                pass
 
     def delete_local_files(self, name):
         self.incoming_deleted_files.put(name)

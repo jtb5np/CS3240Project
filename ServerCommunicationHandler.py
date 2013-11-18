@@ -1,6 +1,3 @@
-import Log
-from LogEntry import LogEntry
-
 __author__ = 'Jacob and Mark'
 
 import threading
@@ -32,14 +29,10 @@ class ServerCommunicationHandler(threading.Thread):
         #create the specified account, send back confirmation of creation
         print 'received user-id: ' + username
         print 'received password: ' + username
-        entry = LogEntry("Server", "New User Created", )
-        Log.addEntry(entry)
         self.account_manager.createAccount(username, password, "TestDirName", self.account_manager.serverDirectoryId)
 
     def sign_in(self, client_ip, client_port, username, user_password):
         if self.account_manager.loginAccount(username, user_password): #if the login was successful
-            entry = LogEntry("Server","User Logged In",username )
-            Log.addEntry(entry)
             if username in self.clients:#if the same username has already logged in from other ip/port
                 print "User " + username + " has logged in from other IP address, but hey you can still join using this IP!"
                 self.clients[username].append(ClientData(client_ip, client_port))
@@ -77,8 +70,6 @@ class ServerCommunicationHandler(threading.Thread):
             print "Username: " + username
             user_root_dir = self.account_manager.getAccountDirectory(username)
             print "user_root = " + user_root_dir
-            entry = LogEntry("Server", "File Received ",username )
-            Log.addEntry(entry)
             if not os.path.exists(user_root_dir + path): os.makedirs(user_root_dir + path)
             with open(user_root_dir + filename, "wb") as handle:
                 handle.write(filedata.data)
@@ -91,8 +82,6 @@ class ServerCommunicationHandler(threading.Thread):
             with open(self.account_manager.getAccountDirectory(username) + filename, "rb") as handle:
                 binary_data = xmlrpclib.Binary(handle.read())
                 print "File " + filename + "sent to " + client_ip
-                entry = LogEntry("Server", filename + " Sent To",client_ip )
-                Log.addEntry(entry)
                 return (True, binary_data)
         else:
             return (False, "ERROR: haha you are not sign in, I wonder why you are not getting your file...")
@@ -100,8 +89,6 @@ class ServerCommunicationHandler(threading.Thread):
 
     def send_deleted_file(self, file_name):
         #send a file to be deleted from the local machine
-        entry = LogEntry("Server", file_name + " File Deleted", )
-        Log.addEntry(entry)
         print 'sent to be deleted: ' + file_name
 
     def copy_files(self):

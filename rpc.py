@@ -14,13 +14,8 @@ def find_available(dest_ip, dest_port):
     except socket.error as e:
         return False
 
-def push_file(server_ip, server_port, file_name, filedata, username, source_ip, source_port):
-    rpc_connect = xmlrpclib.ServerProxy("http://%s:%s/"% (server_ip, server_port), allow_none = True)
-    rpc_connect.receive_file(file_name, filedata, username, source_ip, source_port)
-
 def pull_file_from_server(server_ip, server_port, file_name, username, client_ip, client_port):
     rpc_connect = xmlrpclib.ServerProxy("http://%s:%s/"% (server_ip, server_port), allow_none = True)
-    print "RPC connect created"
     return rpc_connect.send_file(file_name, username, client_ip, client_port)
 
 
@@ -54,4 +49,16 @@ def lock_file(filename, dest_ip, dest_port, source_ip, source_port):
 def push_file(filename, binary, dest_ip, dest_port, source_username, source_ip, source_port):
     #use username, ip, or port to validate, I guess
     rpc_connect = xmlrpclib.ServerProxy("http://%s:%s/"% (dest_ip, dest_port), allow_none = True)
-    rpc_connect.receive_file(filename, binary, source_username, source_ip, source_port)
+    return rpc_connect.receive_file(filename, binary, source_username, source_ip, source_port)
+
+def delete_file(filename, dest_ip, dest_port, source_username, source_ip, source_port):
+    rpc_connect = xmlrpclib.ServerProxy("http://%s:%s/"% (dest_ip, dest_port), allow_none = True)
+    return rpc_connect.delete_file(filename, source_username)
+
+def push_folder(folder_name, dest_ip, dest_port, source_username, source_ip, source_port):
+    rpc_connect = xmlrpclib.ServerProxy("http://%s:%s/"% (dest_ip, dest_port), allow_none = True)
+    return rpc_connect.receive_folder(folder_name, source_username, source_ip, source_port)
+
+def delete_folder(folder_name, dest_ip, dest_port, source_username, source_ip, source_port):
+    rpc_connect = xmlrpclib.ServerProxy("http://%s:%s/"% (dest_ip, dest_port), allow_none = True)
+    return rpc_connect.remove_folder(folder_name, source_username)

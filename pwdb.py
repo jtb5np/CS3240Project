@@ -37,6 +37,22 @@ class dbManager:
             return True
         return False
 
+    #Changes a user's password
+    def changePassword(self, user_name, newPassword):
+        self.conn = sqlite3.connect(self.rootPath+'passwords.db')
+        self.conn.text_factory = str
+        self.c = self.conn.cursor()
+        self.c.execute('''SELECT user_name FROM user WHERE user_name=?''', (user_name,))
+        attemptedUser = self.c.fetchall()
+        if len(attemptedUser) == 1:
+            salt = os.urandom(15)
+            hashed_pw = hashlib.sha512(newPassword+salt).hexdigest()
+            #insert new updates into db
+            self.c.execute('''UPDATE user set password=?, salt=? WHERE user_name=?''', (hashed_pw,salt,user_name))
+            self.conn.commit()
+            return True
+        return False
+
     #finding and authenticating account
     def loginAccount(self, user_name, password):
         self.conn = sqlite3.connect(self.rootPath+'passwords.db')
@@ -66,8 +82,20 @@ class dbManager:
         attemptedUser = self.c.fetchall()
         if len(attemptedUser) == 1:
             result = attemptedUser[0]
-            account_directory = result[0]
-            return self.rootPath + str(account_directory)
+            account_directory = str(result[0])
+            return self.rootPath+account_directory + '/'
+        return "No such user"
+
+    #return the local file directory of the user- useful for getting file locations within the oneDire folder and ignoring those outside
+    def getLocalAccountDirectory(self, user_name):
+        self.conn = sqlite3.connect(self.rootPath+'passwords.db')
+        self.conn.text_factory = str
+        self.c = self.conn.cursor()
+        self.c.execute('''SELECT directory_name FROM user WHERE user_name=?''', (user_name,))
+        attemptedUser = self.c.fetchall()
+        if len(attemptedUser) == 1:
+            result = attemptedUser[0]
+            return result[0]
         return "No such user"
 
     #counts number of files within a directory
