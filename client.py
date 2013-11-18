@@ -27,8 +27,10 @@ class Client():
         if rpc.authenticate_user(self.server_ip, self.server_port, self.ip, self.port, uid, pwd):
             self.username = uid
             print "log in successful for user " + uid
+            return True
         else:
             print "log in unsuccessful, please retry"
+            return False
 
     def push_file(self, filename):
         # this method push the modified/new file to the server

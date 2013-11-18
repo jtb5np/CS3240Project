@@ -69,7 +69,7 @@ class ServerCommunicationHandler(threading.Thread):
             print "Name: " + name
             print "Username: " + username
             user_root_dir = self.account_manager.getAccountDirectory(username)
-            print "user_root = " + user_root_dir
+            print "user_root = " + `user_root_dir`
             if not os.path.exists(user_root_dir + path): os.makedirs(user_root_dir + path)
             try:
                 with open(user_root_dir + filename, "wb") as handle:
@@ -80,8 +80,17 @@ class ServerCommunicationHandler(threading.Thread):
         else:
             return (False, "User not logged in")
 
+    def receive_folder(self, folder_name, username, source_ip, source_port):
+        if self.check_sign_in(username, source_ip, source_port): #if the client (IP and Port) has signed in
+            user_root_dir = self.account_manager.getAccountDirectory(username)
+            print "user_root = " + `user_root_dir`
+            if not os.path.exists(user_root_dir + folder_name):
+                return os.mkdirs(user_root_dir + folder_name)
+            else: return False
+        else: return False
+
     def send_file(self, filename, username, client_ip, client_port):
-        #send a file to be copied to the local machine
+        #send a file to be copied to the local  machine
         # authenticate user
         if self.check_sign_in(username, client_ip, client_port): # if signed in
             with open(self.account_manager.getAccountDirectory(username) + filename, "rb") as handle:
@@ -102,11 +111,13 @@ class ServerCommunicationHandler(threading.Thread):
             self.send_file(name)
             self.file_names.task_done()
 
-    def delete_files(self):
-        while True:
-            name = self.deleted_file_names.get()
-            self.send_deleted_file(name)
-            self.deleted_file_names.task_done()
+    def remove_folder(self, folder_name, username):
+        total_folder_name = self.account_manager.getAccountDirectory(username) + folder_name
+        if os.path.exists(total_folder_name):
+            os.rmdir(total_folder_name)
+            return True
+        else:
+            return False
 
     def start_server(self):
         self.server = SimpleXMLRPCServer((self.ip, self.port), allow_none =True)
@@ -115,3 +126,17 @@ class ServerCommunicationHandler(threading.Thread):
         server_wait = threading.Thread(target=self.server.serve_forever)
         server_wait.start()
         print "server activated, server alive: " + str(server_wait.isAlive()) + ". Server IP: " + self.ip
+
+    def delete_file(self, filename, username):
+        #use the user_id to find where the file should be stored (within the base folder)
+        print filename
+        print username
+        total_file_name = self.account_manager.getAccountDirectory(username) + filename
+        print "Total_file_name = " + total_file_name
+        try:
+            os.remove(total_file_name)
+            print "YAY"
+            return True
+        except OSError:
+            print "Nope dude"
+            return False
