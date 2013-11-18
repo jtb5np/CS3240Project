@@ -77,6 +77,7 @@ class ServerCommunicationHandler(threading.Thread):
         if self.check_sign_in(username, source_ip, source_port): #if the client (IP and Port) has signed in
             entry = LogEntry.LogEntry.__init__("Server", "Received File: " + filename + " from " + username )
             self.log.addEntry(entry)
+
             path, name = os.path.split(filename)
             print "Path: " + path
             print "Name: " + name
