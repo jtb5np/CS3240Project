@@ -35,8 +35,7 @@ def listen_for_connection(ch):
             connection.send(response)
 
 def main():
-    name = raw_input("Enter the name of the directory you want to synchronize: ")
-    root_folder = os.path.expanduser("~/Desktop/%s/"% (name))
+    root_folder = raw_input("Enter the name of the directory you want to synchronize: ")
     try:
         os.mkdir(root_folder)
     except OSError:
@@ -51,7 +50,7 @@ def main():
     local_port = raw_input("Inter the port you want to use (from 9000 - 9999): ")
 
     #test script
-    server_ip = get_local_ip()
+    server_ip = "172.25.203.169"
     server_port = 8001
     local_ip = get_local_ip()
 

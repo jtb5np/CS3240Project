@@ -82,8 +82,8 @@ class dbManager:
         attemptedUser = self.c.fetchall()
         if len(attemptedUser) == 1:
             result = attemptedUser[0]
-            account_directory = result[0]
-            return self.rootPath+account_directory
+            account_directory = str(result[0])
+            return self.rootPath + account_directory + '/'
         return "No such user"
 
     #return the local file directory of the user- useful for getting file locations within the oneDire folder and ignoring those outside
