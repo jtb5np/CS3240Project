@@ -28,7 +28,7 @@ class ServerCommunicationHandler(threading.Thread):
         self.start_server()
         self.account_manager = account_manager
         self.log = Log
-        entry = LogEntry.__init__("Admin", "Created Server")
+        entry = LogEntry.__init__("System", "Created Server")
         self.log.addEntry(entry)
 
     def create_new_account(self, username, password):
