@@ -6,21 +6,12 @@ __author__ = 'wil'
 
 class LogEntry:
 
-    def __init__(self, defaultType = 'generalEntry', defaultInfo = 'Unspecified', defaultActor = 'System'):
+    def __init__(self, defaultActor = 'Admin', defaultInfo = 'Unspecified'):
 
-        self.type = defaultType
         self.info = defaultInfo
         self.actor = defaultActor
         self.timeStamp = str(datetime.datetime.now())
 
-
-    def setType(self, newType):
-
-        self.type = newType
-
-    def getType(self):
-
-        return self.type
 
     def setInfo(self, newInfo):
 
@@ -48,7 +39,7 @@ class LogEntry:
 
     def printLogEntry(self):
 
-        out = self.getActor() + ' : ' + self.getTimeStamp() + ' - ' + self.getType() + ' (' + self.getInfo() + ') '
+        out = self.getActor() + ' : ' + self.getTimeStamp() + ' - ' + (' + self.getInfo() + ')
         print out
 
 

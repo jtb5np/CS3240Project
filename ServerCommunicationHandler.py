@@ -7,7 +7,8 @@ from SimpleXMLRPCServer import SimpleXMLRPCServer, SimpleXMLRPCRequestHandler
 from time import sleep
 import xmlrpclib
 import shutil
-
+import Log
+import LogEntry
 
 
 class ClientData():
@@ -26,16 +27,23 @@ class ServerCommunicationHandler(threading.Thread):
         self.start_server()
         self.account_manager = account_manager
         self.username_file_ip = dict()
-
+        self.log = Log
+        entry = LogEntry.__init__("Admin", "Created Server")
+        self.log.addEntry(entry)
+        
     def create_new_account(self, username, password):
         #create the specified account, send back confirmation of creation
         print 'received user-id: ' + username
         print 'received password: ' + username
+        entry = LogEntry.__init__(username, "Created an account")
+        self.log.addEntry(entry)
         self.account_manager.createAccount(username, password, "TestDirName", self.account_manager.serverDirectoryId)
 
     def sign_in(self, client_ip, client_port, username, user_password):
-        print "In Sign In"
+        
         if self.account_manager.loginAccount(username, user_password): #if the login was successful
+            entry = LogEntry.__init__(username, "Logged In")
+            self.log.addEntry(entry)
             if username in self.clients:#if the same username has already logged in from other ip/port
                 print "User " + username + " has logged in from other IP address, but hey you can still join using this IP!"
                 self.clients[username].append(ClientData(client_ip, client_port))
@@ -68,38 +76,27 @@ class ServerCommunicationHandler(threading.Thread):
     def receive_file(self, filename, filedata, username, source_ip, source_port):
         if self.check_sign_in(username, source_ip, source_port): #if the client (IP and Port) has signed in
             path, name = os.path.split(filename)
+            print "Path: " + path
+            print "Name: " + name
+            print "Username: " + username
             user_root_dir = self.account_manager.getAccountDirectory(username)
+            print "user_root = " + `user_root_dir`
             if not os.path.exists(user_root_dir + path): os.makedirs(user_root_dir + path)
             try:
                 with open(user_root_dir + filename, "wb") as handle:
                     handle.write(filedata.data)
-                if username not in self.username_file_ip.keys(): # if the user doesn't exist
-                    print "In receive_file: new user"
-                    file_ip = dict()
-                    file_ip[filename] = (source_ip, source_port)
-                    self.username_file_ip[username] = file_ip
-                else:
-                    if filename not in self.username_file_ip[username].keys(): # if this is a new file for the user
-                        print "In receive_file: old user, new file"
-                        (self.username_file_ip[username])[filename] = (source_ip, source_port)
-                    else: # if this is a modified file
-                        print "In receive_file: old user, old file"
-                        (self.username_file_ip[username])[filename] = (source_ip, source_port)
-                return True
+                    return (True, "File received by the server")
             except:
-                return False
+                return (False, "File received but encountered a problem when writing the file onto storage")
         else:
-            return False
+            return (False, "User not logged in")
 
     def receive_folder(self, folder_name, username, source_ip, source_port):
         if self.check_sign_in(username, source_ip, source_port): #if the client (IP and Port) has signed in
             user_root_dir = self.account_manager.getAccountDirectory(username)
             print "user_root = " + `user_root_dir`
             if not os.path.exists(user_root_dir + folder_name):
-                file_ip = dict()
-                file_ip[folder_name] = (source_ip, source_port)
-                self.username_file_ip[username] = file_ip
-                return os.makedirs(user_root_dir + folder_name)
+                return os.mkdirs(user_root_dir + folder_name)
             else: return False
         else: return False
 
@@ -139,6 +136,8 @@ class ServerCommunicationHandler(threading.Thread):
         self.server.register_introspection_functions()
         server_wait = threading.Thread(target=self.server.serve_forever)
         server_wait.start()
+        entry = LogEntry.__init__("Admin", "Started Server")
+        self.log.addEntry(entry)
         print "server activated, server alive: " + str(server_wait.isAlive()) + ". Server IP: " + self.ip
 
     def delete_file(self, filename, username):
