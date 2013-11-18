@@ -106,15 +106,14 @@ class Server():
                 rpc_connect.lock_file_local(filename)
 
     def receive_file(self, filename, filedata, user_id):
-        path, name = os.path.split(filename)
         #use the user_id to find where the file should be stored (within the base folder)
-        file_location = self.base_folder + path
+        file_location = self.account_manager.getAccountDirectory(user_id) + '/' + filename
         try:
             os.makedirs(file_location)
         except OSError:
             print 'that directory already exists!'
         try:
-            with open(file_location + name, "wb") as handle:
+            with open(file_location, "wb") as handle:
                 handle.write(filedata.data)
                 return True
         except OSError:
@@ -138,9 +137,9 @@ class Server():
 
     def delete_file(self, filename, username):
         #use the user_id to find where the file should be stored (within the base folder)
-        total_file_name = self.base_folder + filename
+        file_location = self.account_manager.getAccountDirectory(username) + filename
         try:
-            os.remove(total_file_name)
+            os.remove(file_location)
             return True
         except OSError:
             return False
