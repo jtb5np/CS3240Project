@@ -144,6 +144,9 @@ class ServerCommunicationHandler(threading.Thread):
 
         print "System has " + num_files + " files totaling " + size_files + " bits between " + num_users + " users"
 
+    def print_log(self):
+        self.log.print_log()
+
 
     def start_server(self):
         self.server = SimpleXMLRPCServer((self.ip, self.port), allow_none =True)
