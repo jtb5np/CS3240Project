@@ -24,25 +24,26 @@ class ServerCommunicationHandler(threading.Thread):
         self.port = port
         self.clients = clients
         self.server = None
-        self.start_server()
         self.account_manager = account_manager
         self.username_file_ip = dict()
-        self.log = Log.Log.__init__()
-        entry = LogEntry.LogEntry.__init__("Admin", "Created Server")
+        self.log = Log.Log()
+        entry = LogEntry.LogEntry("Admin", "Created Server")
         self.log.addEntry(entry)
+        self.start_server()
+
         
     def create_new_account(self, username, password):
         #create the specified account, send back confirmation of creation
         print 'received user-id: ' + username
         print 'received password: ' + username
-        entry = LogEntry.LogEntry.__init__(username, "Created an account")
+        entry = LogEntry.LogEntry(username, "Created an account")
         self.log.addEntry(entry)
         self.account_manager.createAccount(username, password, "TestDirName", self.account_manager.serverDirectoryId)
 
     def sign_in(self, client_ip, client_port, username, user_password):
         
         if self.account_manager.loginAccount(username, user_password): #if the login was successful
-            entry = LogEntry.LogEntry.__init__(username, "Logged In")
+            entry = LogEntry.LogEntrys(username, "Logged In")
             self.log.addEntry(entry)
             if username in self.clients:#if the same username has already logged in from other ip/port
                 print "User " + username + " has logged in from other IP address, but hey you can still join using this IP!"
@@ -75,7 +76,7 @@ class ServerCommunicationHandler(threading.Thread):
 
     def receive_file(self, filename, filedata, username, source_ip, source_port):
         if self.check_sign_in(username, source_ip, source_port): #if the client (IP and Port) has signed in
-            entry = LogEntry.LogEntry.__init__("Server", "Received File: " + filename + " from " + username )
+            entry = LogEntry.LogEntry("Server", "Received File: " + filename + " from " + username )
             self.log.addEntry(entry)
 
             path, name = os.path.split(filename)
@@ -96,7 +97,7 @@ class ServerCommunicationHandler(threading.Thread):
 
     def receive_folder(self, folder_name, username, source_ip, source_port):
         if self.check_sign_in(username, source_ip, source_port): #if the client (IP and Port) has signed in
-            entry = LogEntry.LogEntry.__init__("Server", "Received Folder: " + folder_name + " from " + username )
+            entry = LogEntry.LogEntry("Server", "Received Folder: " + folder_name + " from " + username )
             self.log.addEntry(entry)
             user_root_dir = self.account_manager.getAccountDirectory(username)
             print "user_root = " + `user_root_dir`
@@ -109,7 +110,7 @@ class ServerCommunicationHandler(threading.Thread):
         #send a file to be copied to the local  machine
         # authenticate user
         if self.check_sign_in(username, client_ip, client_port): # if signed in
-            entry = LogEntry.LogEntry.__init__("Server", "Sent File: " + filename + " to " + username )
+            entry = LogEntry.LogEntry("Server", "Sent File: " + filename + " to " + username )
             self.log.addEntry(entry)
             with open(self.account_manager.getAccountDirectory(username) + filename, "rb") as handle:
                 binary_data = xmlrpclib.Binary(handle.read())
@@ -161,7 +162,7 @@ class ServerCommunicationHandler(threading.Thread):
         self.server.register_introspection_functions()
         server_wait = threading.Thread(target=self.server.serve_forever)
         server_wait.start()
-        entry = LogEntry.LogEntry.__init__("Admin", "Started Server")
+        entry = LogEntry.LogEntry("Admin", "Started Server")
         self.log.addEntry(entry)
         print "server activated, server alive: " + str(server_wait.isAlive()) + ". Server IP: " + self.ip
 
