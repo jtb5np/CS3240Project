@@ -123,7 +123,6 @@ class LocalCommunicationHandler(threading.Thread):
             except Empty:
                 pass
 
-
     def delete_files(self):
         if self.sync_on:
             try:
