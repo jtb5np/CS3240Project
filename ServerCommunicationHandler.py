@@ -43,7 +43,7 @@ class ServerCommunicationHandler(threading.Thread):
     def sign_in(self, client_ip, client_port, username, user_password):
         
         if self.account_manager.loginAccount(username, user_password): #if the login was successful
-            entry = LogEntry.LogEntrys(username, "Logged In")
+            entry = LogEntry.LogEntry(username, "Logged In")
             self.log.addEntry(entry)
             if username in self.clients:#if the same username has already logged in from other ip/port
                 print "User " + username + " has logged in from other IP address, but hey you can still join using this IP!"
