@@ -25,23 +25,32 @@ class ServerCommunicationHandler(threading.Thread):
         self.clients = clients
         self.server = None
         self.account_manager = account_manager
-        self.username_file_ip = dict()
+        self.username_mac_addresses = dict()
+        self.mac_file_lists = dict()
+        self.mac_deleted_file_lists = dict()
         self.log = Log.Log()
         entry = LogEntry.LogEntry("Admin", "Created Server")
         self.log.addEntry(entry)
         self.start_server()
 
         
-    def create_new_account(self, username, password):
+    def create_new_account(self, username, password, mac_addr):
         #create the specified account, send back confirmation of creation
         print 'received user-id: ' + username
         print 'received password: ' + username
+        if username in self.username_mac_addresses.keys():
+            self.username_mac_addresses[username].append(mac_addr)
+        else:
+            self.username_mac_addresses[username] = [mac_addr]
+        if mac_addr not in self.mac_file_lists.keys():
+            self.mac_file_lists[mac_addr] = []
+        if mac_addr not in self.mac_deleted_file_lists.keys():
+            self.mac_deleted_file_lists[mac_addr] = []
         entry = LogEntry.LogEntry(username, "Created an account")
         self.log.addEntry(entry)
         self.account_manager.createAccount(username, password, "TestDirName", self.account_manager.serverDirectoryId)
 
     def sign_in(self, client_ip, client_port, username, user_password):
-        
         if self.account_manager.loginAccount(username, user_password): #if the login was successful
             entry = LogEntry.LogEntry(username, "Logged In")
             self.log.addEntry(entry)
@@ -74,34 +83,40 @@ class ServerCommunicationHandler(threading.Thread):
             # if no, return prompt to register
             return False
 
-    def receive_file(self, filename, filedata, username, source_ip, source_port):
+    def receive_file(self, filename, filedata, username, source_ip, source_port, mac_addr):
         if self.check_sign_in(username, source_ip, source_port): #if the client (IP and Port) has signed in
             entry = LogEntry.LogEntry("Server", "Received File: " + filename + " from " + username )
             self.log.addEntry(entry)
-
             path, name = os.path.split(filename)
             print "Path: " + path
             print "Name: " + name
             print "Username: " + username
             user_root_dir = self.account_manager.getAccountDirectory(username)
             print "user_root = " + `user_root_dir`
-            if not os.path.exists(user_root_dir + path): os.makedirs(user_root_dir + path)
+            if not os.path.exists(user_root_dir + path):
+                os.makedirs(user_root_dir + path)
             try:
                 with open(user_root_dir + filename, "wb") as handle:
                     handle.write(filedata.data)
-                    return (True, "File received by the server")
+                    for ma in self.username_mac_addresses[username]:
+                        if not ma == mac_addr:
+                            self.mac_file_lists[ma].append(filename)
+                    return True
             except:
-                return (False, "File received but encountered a problem when writing the file onto storage")
+                return False
         else:
-            return (False, "User not logged in")
+            return False
 
-    def receive_folder(self, folder_name, username, source_ip, source_port):
+    def receive_folder(self, folder_name, username, source_ip, source_port, mac_addr):
         if self.check_sign_in(username, source_ip, source_port): #if the client (IP and Port) has signed in
             entry = LogEntry.LogEntry("Server", "Received Folder: " + folder_name + " from " + username )
             self.log.addEntry(entry)
             user_root_dir = self.account_manager.getAccountDirectory(username)
             print "user_root = " + `user_root_dir`
             if not os.path.exists(user_root_dir + folder_name):
+                for ma in self.username_mac_addresses[username]:
+                        if not ma == mac_addr:
+                            self.mac_file_lists[ma].append(folder_name)
                 return os.mkdirs(user_root_dir + folder_name)
             else: return False
         else: return False
@@ -123,12 +138,6 @@ class ServerCommunicationHandler(threading.Thread):
     def send_deleted_file(self, file_name):
         #send a file to be deleted from the local machine
         print 'sent to be deleted: ' + file_name
-
-    def copy_files(self):
-        while True:
-            name = self.file_names.get()
-            self.send_file(name)
-            self.file_names.task_done()
 
     def remove_folder(self, folder_name, username):
         total_folder_name = self.account_manager.getAccountDirectory(username) + folder_name
@@ -155,7 +164,6 @@ class ServerCommunicationHandler(threading.Thread):
     def print_log(self):
         self.log.log.print_log()
 
-
     def start_server(self):
         self.server = SimpleXMLRPCServer((self.ip, self.port), allow_none =True)
         self.server.register_instance(self)
@@ -166,13 +174,16 @@ class ServerCommunicationHandler(threading.Thread):
         self.log.addEntry(entry)
         print "server activated, server alive: " + str(server_wait.isAlive()) + ". Server IP: " + self.ip
 
-    def delete_file(self, filename, username):
+    def delete_file(self, filename, username, mac_addr):
         #use the user_id to find where the file should be stored (within the base folder)
         print filename
         print username
         total_file_name = self.account_manager.getAccountDirectory(username) + filename
         print "Total_file_name = " + total_file_name
         try:
+            for ma in self.username_mac_addresses[username]:
+                        if not ma == mac_addr:
+                            self.mac_deleted_file_lists[ma].append(filename)
             if os.path.isdir(total_file_name):
                 print "Trying to remove folder" + total_file_name
                 shutil.rmtree(total_file_name)
