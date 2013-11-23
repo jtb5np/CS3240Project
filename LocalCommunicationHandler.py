@@ -42,8 +42,7 @@ class LocalCommunicationHandler(threading.Thread):
         #password in a text file and return True, else return False
         b = self.client.create_new_account(uid, pwd)
         if b:
-            self.create_account_file(uid, pwd)
-            return True
+            return self.create_account_file(uid, pwd)
         else:
             return False
 

@@ -12,7 +12,8 @@ import LogEntry
 
 
 class ClientData():
-    def __init__(self, ip, port):
+    def __init__(self, mac, ip, port):
+        self.mac = mac
         self.ip = ip
         self.port = port
 
@@ -22,7 +23,8 @@ class ServerCommunicationHandler(threading.Thread):
         threading.Thread.__init__(self)
         self.ip = ip
         self.port = port
-        self.clients = clients
+        # dictionary that maps username to dictionary that maps MAC addresse to file
+        self.username_to_mac = clients
         self.server = None
         self.account_manager = account_manager
         self.username_mac_addresses = dict()
@@ -33,7 +35,6 @@ class ServerCommunicationHandler(threading.Thread):
         self.log.addEntry(entry)
         self.start_server()
 
-        
     def create_new_account(self, username, password, mac_addr):
         #create the specified account, send back confirmation of creation
         print 'received user-id: ' + username
@@ -46,23 +47,43 @@ class ServerCommunicationHandler(threading.Thread):
             self.mac_file_lists[mac_addr] = []
         if mac_addr not in self.mac_deleted_file_lists.keys():
             self.mac_deleted_file_lists[mac_addr] = []
+
+    def create_new_account(self, username, password, mac):
+        #create the specified account, send back confirmation of creation
+        print 'received user-id: ' + username
+        print 'received password: ' + password
+        print 'from MAC: ' + mac
+        # logging
         entry = LogEntry.LogEntry(username, "Created an account")
         self.log.addEntry(entry)
-        self.account_manager.createAccount(username, password, "TestDirName", self.account_manager.serverDirectoryId)
+        # creates account and add this username to our dictionary
+        try:
+            self.account_manager.createAccount(username, password, "TestDirName", self.account_manager.serverDirectoryId)
+            self.clients[username] = dict([(mac, list())])
+            return True
+        except:
+            return False
 
-    def sign_in(self, client_ip, client_port, username, user_password):
+    def sign_in(self, client_ip, client_port, client_mac, username, user_password):
         if self.account_manager.loginAccount(username, user_password): #if the login was successful
+            # Logging
             entry = LogEntry.LogEntry(username, "Logged In")
             self.log.addEntry(entry)
             if username in self.clients:#if the same username has already logged in from other ip/port
-                print "User " + username + " has logged in from other IP address, but hey you can still join using this IP!"
-                self.clients[username].append(ClientData(client_ip, client_port))
-                print self.clients
-            else: #if no client detected under this username
-                print "Welcome " + username +  " to your first log in!"
-                self.clients[username] = [ClientData(client_ip, client_port)]
-                print self.clients
-            return True
+                print "User " + username + " has logged in from other IP address, but hey you can still join using this IP and MAC!"
+                if client_mac in self.clients[username].keys(): # if the client has already logged in at least onece from this MAC address
+                    # method here should cause the client to fetch all files listed in self.clients[username][client_mac]
+                    # TODO if the client checks the list every few moments we shouldn't need to do anything here right?
+                    print "You've logged in from this MAC (" + client_mac + ") before. Welcome back!"
+                    return True
+                else: # if the client log in on this MAC for the first time
+                    # create the list, and put all files that belong to this client in there
+                    print "This is the first time you've logged in from this MAC! Welcome. Let me get you all your files..."
+                    self.client[username][client_mac] = "" # TODO here should put all files into the list
+                    return True
+            else: # if the client dictionary that maps its username to MAC hasn't been created for some reason - actually this shouldn't happen. We'll jsut return False here
+                print "Internal Problem."
+                return False
         else:
             print "Username and password don't match our database"
             print 'user name: ' + username

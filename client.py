@@ -6,12 +6,14 @@ import subprocess
 from xmlrpclib import *
 import xmlrpclib
 import os
+from uuid import getnode as get_mac
 
 
 class Client():
     def __init__(self, ip, port, server_ip, server_port, username, root_folder):
         self.ip = ip
         self.port = 8001
+        self.mac = get_mac()
         self.server_ip = server_ip
         self.server_port = server_port
         self.server_available = True
@@ -24,7 +26,7 @@ class Client():
 
     def login(self, uid, pwd):
         print "log in in process"
-        if rpc.authenticate_user(self.server_ip, self.server_port, self.ip, self.port, uid, pwd):
+        if rpc.authenticate_user(self.server_ip, self.server_port, self.ip, self.port, self.mac, uid, pwd):
             self.username = uid
             print "log in successful for user " + uid
             return True
@@ -67,7 +69,7 @@ class Client():
         print "locking local file"
 
     def create_new_account(self, uid, pwd):
-        return rpc.create_account(self.server_ip, self.server_port, uid, pwd)
+        return rpc.create_account(self.server_ip, self.server_port, self.mac, uid, pwd)
 
     def delete_file(self, filename):
         if os.path.isdir(filename):
