@@ -9,10 +9,12 @@ class Log:
     def __init__(self, history = []):
 
         self.log = history
+        log_file = open("log.txt")
 
     def addEntry(self, entry):
 
         self.log.append(entry)
+        self.update_log_file(entry)
 
     def printLatestEntry(self):
 
@@ -22,9 +24,12 @@ class Log:
 
         for x in self.log:
 
-           if isinstance(x, LogEntry):
-            x.printLogEntry()
+            if isinstance(x, LogEntry):
+                x.printLogEntry()
 
+    def update_log_file(self,entry):
+
+        self.log_file.write(entry.printLogEntry())
 
     def get_actor_activity(self,actor):
 
