@@ -50,6 +50,57 @@ class ServerCommunicationHandler(threading.Thread):
         self.log.addEntry(entry)
         self.account_manager.createAccount(username, password, "TestDirName", self.account_manager.serverDirectoryId)
 
+    def get_files_in(self, some_path_name):
+        temp_list = self.list_dir_ignore_backups(some_path_name)
+        temp_list_2 = []
+        for f in temp_list:
+            total_path_name =  some_path_name + '/' + f
+            temp_list_2.append(total_path_name)
+            if os.path.isdir(total_path_name):
+                for fi in self.get_files_in(total_path_name):
+                    temp_list_2.append(fi)
+        return temp_list_2
+
+    def list_dir_ignore_backups(self, some_path_name):
+        the_list = os.listdir(some_path_name)
+        temp_list = []
+        for f in the_list:
+            temp_list.append(f)
+        for f in temp_list:
+            if f.endswith('~') or f.startswith('.'):
+                the_list.remove(f)
+        return the_list
+
+    #need to finish this method
+    def get_all_files(self, username, client_ip, client_port):
+        #send a file to be copied to the local  machine
+        # authenticate user
+        if self.check_sign_in(username, client_ip, client_port): # if signed in
+            entry = LogEntry.LogEntry("Server", "Sent All Files: " + " to " + username )
+            self.log.addEntry(entry)
+            ret_list = [self.get_most_recent_timestamp(username)]
+            for filename in self.get_files_in(self.account_manager.getAccountDirectory(username)):
+                print filename
+                # if os.path.isdir(self.account_manager.getAccountDirectory(username) + filename):
+                #     ret_list.append((filename, None))
+                # else:
+                #     with open(self.account_manager.getAccountDirectory(username) + filename, "rb") as handle:
+                #         binary_data = xmlrpclib.Binary(handle.read())
+                #         print "File " + filename + "sent to " + client_ip
+                #         ret_list.append((filename, binary_data))
+            return ret_list
+        else:
+            return []
+
+    def get_most_recent_timestamp(self, username):
+        f_list = self.get_files_in(self.account_manager.getAccountDirectory(username))
+        latest_time = 0
+        for f in f_list:
+            time = os.path.getmtime(f)
+            if time > latest_time:
+                latest_time = time
+        return latest_time
+
     def sign_in(self, client_ip, client_port, username, user_password):
         if self.account_manager.loginAccount(username, user_password): #if the login was successful
             entry = LogEntry.LogEntry(username, "Logged In")
@@ -197,8 +248,10 @@ class ServerCommunicationHandler(threading.Thread):
         print "Total_file_name = " + total_file_name
         try:
             for ma in self.username_mac_addresses[username]:
-                        if not ma == mac_addr:
-                            self.mac_deleted_file_lists[ma].append(filename)
+                if filename in self.mac_file_lists[ma]:
+                    self.mac_file_lists[ma].remove(filename)
+                if not ma == mac_addr:
+                    self.mac_deleted_file_lists[ma].append(filename)
             if os.path.isdir(total_file_name):
                 print "Trying to remove folder" + total_file_name
                 shutil.rmtree(total_file_name)

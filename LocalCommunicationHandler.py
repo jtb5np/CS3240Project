@@ -47,9 +47,13 @@ class LocalCommunicationHandler(threading.Thread):
 
     #completed helper method
     def create_account_file(self, id, password):
-        f = open('account_info.txt', 'w')
-        f.write(id + '\n' + password)
-        f.close()
+        try:
+            f = open('account_info.txt', 'w')
+            f.write(id + '\n' + password)
+            f.close()
+            return True
+        except OSError:
+            return False
 
     #also should be pretty much complete, need to test (also probably get rid of print statements when done)
     def sign_in(self, uid, pwd):
@@ -58,9 +62,18 @@ class LocalCommunicationHandler(threading.Thread):
         self.signed_in = self.client.login(uid, pwd)
         if self.signed_in:
             self.username = uid
+            self.get_all_server_files()
             print 'Sign in successful'
         else:
             print "Sign in unsuccessful for user " + uid
+
+    def get_all_server_files(self):
+        list_from_server = self.client.get_all_files()
+        timestamp = list_from_server.pop(0)
+        print timestamp
+        #print list_from_server
+        for name, filedata in list_from_server:
+            self.incoming_file_names.put((name, filedata))
 
     def change_password(self, pwd):
         #send password to server, change password
