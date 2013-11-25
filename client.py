@@ -34,6 +34,10 @@ class Client():
             print "log in unsuccessful, please retry"
             return False
 
+    def sign_out(self):
+        print "Client is trying to sign out..."
+        return rpc.sign_out(self.server_ip, self.server_port, self.username, self.ip, self.port)
+
     def push_file(self, filename):
         # this method push the modified/new file to the server
         if os.path.isdir(filename):
@@ -88,6 +92,7 @@ class Client():
         print "in activate"
         self.mark_presence()
         #self.login()
+
 
 def main():
     print "haha"

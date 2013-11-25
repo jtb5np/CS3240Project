@@ -71,3 +71,7 @@ def server_deleted_files():
 def delete_folder(folder_name, dest_ip, dest_port, source_username, source_ip, source_port):
     rpc_connect = xmlrpclib.ServerProxy("http://%s:%s/"% (dest_ip, dest_port), allow_none = True)
     return rpc_connect.remove_folder(folder_name, source_username)
+
+def sign_out(dest_ip, dest_port, source_username, source_ip, source_port):
+    rpc_connect = xmlrpclib.ServerProxy("http://%s:%s/"% (dest_ip, dest_port), allow_none = True)
+    return rpc_connect.sign_out(source_username, source_ip, source_port)
