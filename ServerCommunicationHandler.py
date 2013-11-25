@@ -125,16 +125,19 @@ class ServerCommunicationHandler(threading.Thread):
         #send a file to be copied to the local  machine
         # authenticate user
         if self.check_sign_in(username, client_ip, client_port): # if signed in
-            entry = LogEntry.LogEntry("Server", "Sent File: " + filename + " to " + username )
-            self.log.addEntry(entry)
+
             ret_list = []
             for filename in self.mac_file_lists[client_mac]:
                 if os.path.isdir(self.account_manager.getAccountDirectory(username) + filename):
                     ret_list.append((filename, None))
+                    entry = LogEntry.LogEntry("Server", "Sent File: " + filename + " to " + username )
+                    self.log.addEntry(entry)
                 else:
                     with open(self.account_manager.getAccountDirectory(username) + filename, "rb") as handle:
                         binary_data = xmlrpclib.Binary(handle.read())
                         print "File " + filename + "sent to " + client_ip
+                        entry = LogEntry.LogEntry("Server", "Sent File: " + filename + " to " + username )
+                        self.log.addEntry(entry)
                         ret_list.append((filename, binary_data))
             del self.mac_file_lists[client_mac][:]
             return ret_list
@@ -145,12 +148,12 @@ class ServerCommunicationHandler(threading.Thread):
         #send a file to be copied to the local  machine
         # authenticate user
         if self.check_sign_in(username, client_ip, client_port): # if signed in
-            entry = LogEntry.LogEntry("Server", "Sent File: " + filename + " to " + username )
-            self.log.addEntry(entry)
             ret_list = []
             for filename in self.mac_deleted_file_lists[client_mac]:
                     ret_list.append(filename)
             del self.mac_deleted_file_lists[client_mac][:]
+            entry = LogEntry.LogEntry(username, "Deleted File: " + filename + " at Mac Address " + client_mac)
+            self.log.addEntry(entry)
             return ret_list
         else:
             return []

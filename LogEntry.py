@@ -39,7 +39,7 @@ class LogEntry:
 
     def printLogEntry(self):
 
-        out = self.getActor() + ' : ' + self.getTimeStamp() + ' - ' + (' + self.getInfo() + ')
+        out = self.getActor() + ' : ' + self.getTimeStamp() + ' - ' + (self.getInfo())
         print out
 
 
