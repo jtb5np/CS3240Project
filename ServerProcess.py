@@ -20,8 +20,6 @@ def main():
     #creating communication handler
     account_manager = dbManager(root_dir)
 
-    print client_info
-
     server_comm = ServerCommunicationHandler.ServerCommunicationHandler(server_ip, port, account_manager)
 
 

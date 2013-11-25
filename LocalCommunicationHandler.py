@@ -108,6 +108,7 @@ class LocalCommunicationHandler(threading.Thread):
     def listen(self):
         #check for and handle incoming messages from server
         #self.check_for_deleted_files()
+        # TODO why is check_for_deleted_files() commented out?
         self.check_for_new_files()
 
     def check_for_deleted_files(self):
