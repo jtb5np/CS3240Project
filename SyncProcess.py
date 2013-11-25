@@ -57,10 +57,40 @@ def main():
     lch = LocalCommunicationHandler(server_ip, server_port, local_ip, local_port, root_folder, files_to_send, files_to_delete,
                                     files_to_receive, deleted_files_to_receive)
     listener_thread = threading.Thread(target=listen_for_connection, args=(lch,))
+
+    main_menu = "0. Create Account\n1. Sign In\n2. Sign Out\n3.Stop Syncing\n4.Exit"
+    exit = False
+    while not exit:
+        print main_menu
+        selection = int(raw_input("Plesae indicate what you want to do here: "))
+        if selection == 0:
+            forfeit = False
+            username = str(raw_input("Input your desired username here: "))
+            while not forfeit:
+                password = str(raw_input("Input your password: "))
+                password_confirm = str(raw_input("Input your password for confirmation: "))
+                if password == password_confirm:
+                    if lch.create_new_account(username, password):
+                        print "Account created!"
+                        continue
+                    else:
+                        print "Creation unsuccessful, sorry!"
+                else:
+                    input = str(raw_input("Passwords don't match. Try again? y/n"))
+                    # TODO unfinished here
+                    break
+
+
+
+
+
+
     #lch.create_new_account("mark", "markspassword")
     lch.sign_in("mark", "markspassword")
     fwr.start()
     lch.start()
+
+
     #lch.create_new_account("mark", "markspassword")
 
     #lch.pull_file("/Users/xf3da/Desktop/testfile.rtf")
