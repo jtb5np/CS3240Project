@@ -5,6 +5,7 @@ from time import sleep
 import os
 from Queue import *
 import threading
+import shutil
 
 
 class FileWatcher(threading.Thread):
@@ -18,13 +19,14 @@ class FileWatcher(threading.Thread):
         self.deleted_file_names = dq
         self.incoming_file_names = iq
         self.incoming_deleted_file_names = idq
+        self.synced_from_server = []
 
     def run(self):
         while True:
-            print "Starting Looking for Files"
             self.find_all_files()
-            #self.update_local_files()#not sure if we want to handle file updating task here?
-            sleep(1)
+            sleep(.5)
+            self.update_local_files()
+            sleep(.5)
 
     def find_modified_files(self):
         mod_files = []
@@ -32,7 +34,11 @@ class FileWatcher(threading.Thread):
         for f in self.get_files_in(self.path_name):
             if not os.path.isdir(f):
                 try:
-                    t = os.path.getmtime(f)
+                    #print self.synced_from_server
+                    if f not in self.synced_from_server:
+                        t = os.path.getmtime(f)
+                    else:
+                        t = 0
                 except OSError:
                     t = 0
                 if t > self.latest_time:
@@ -42,6 +48,7 @@ class FileWatcher(threading.Thread):
                         temp_latest_time = t
         if temp_latest_time > self.latest_time:
             self.latest_time = temp_latest_time
+            del self.synced_from_server[:]
         return mod_files
 
     def get_files_in(self, some_path_name):
@@ -104,12 +111,35 @@ class FileWatcher(threading.Thread):
         self.delete_local_file()
 
     def delete_local_file(self):
-        df = self.incoming_deleted_file_names.get()
-        os.remove(self.path_name + df)
-        self.files.remove(df)
-        self.incoming_deleted_file_names.task_done()
+        try:
+            df = self.incoming_deleted_file_names.get_nowait()
+            if os.path.isdir(df):
+                shutil.rmtree(df)
+            else:
+                os.remove(df)
+            self.files.remove(df)
+            self.incoming_deleted_file_names.task_done()
+        except Empty:
+            pass
 
     def modify_local_file(self):
-        #how do we make the timing work???
-        #and perhaps more importantly, how do we get and use the file data?
-        print "I don't know what to do here"
+        try:
+            f, d = self.incoming_file_names.get_nowait()
+            if d == None:
+                os.makedirs(f)
+                if f not in self.synced_from_server:
+                    self.synced_from_server.append(f)
+            else:
+                path, name = os.path.split(f)
+                if not os.path.exists(path):
+                    os.makedirs(path)
+                try:
+                    with open(f, "wb") as handle:
+                        handle.write(d.data)
+                        if f not in self.synced_from_server:
+                            self.synced_from_server.append(f)
+                except OSError:
+                    pass
+            self.incoming_file_names.task_done()
+        except Empty:
+            pass

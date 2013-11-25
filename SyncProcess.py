@@ -47,16 +47,17 @@ def main():
     deleted_files_to_receive = Queue()
     fwr = FileWatcher(files_to_send, files_to_delete, files_to_receive, deleted_files_to_receive, root_folder)
 
-    local_port = raw_input("Inter the port you want to use (from 9000 - 9999): ")
+    local_port = int(raw_input("Enter the port you want to use (from 9000 - 9999): "))
 
     #test script
-    server_ip = "172.25.203.169"
+    server_ip = "172.25.45.137"
     server_port = 8002
     local_ip = get_local_ip()
 
     lch = LocalCommunicationHandler(server_ip, server_port, local_ip, local_port, root_folder, files_to_send, files_to_delete,
                                     files_to_receive, deleted_files_to_receive)
     listener_thread = threading.Thread(target=listen_for_connection, args=(lch,))
+    #lch.create_new_account("mark", "markspassword")
     lch.sign_in("mark", "markspassword")
     fwr.start()
     lch.start()

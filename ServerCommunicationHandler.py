@@ -12,8 +12,7 @@ import LogEntry
 
 
 class ClientData():
-    def __init__(self, mac, ip, port):
-        self.mac = mac
+    def __init__(self, ip, port):
         self.ip = ip
         self.port = port
 
@@ -23,8 +22,7 @@ class ServerCommunicationHandler(threading.Thread):
         threading.Thread.__init__(self)
         self.ip = ip
         self.port = port
-        # dictionary that maps username to dictionary that maps MAC addresse to file
-        self.username_to_mac = clients
+        self.clients = clients
         self.server = None
         self.account_manager = account_manager
         self.username_mac_addresses = dict()
@@ -35,6 +33,7 @@ class ServerCommunicationHandler(threading.Thread):
         self.log.addEntry(entry)
         self.start_server()
 
+        
     def create_new_account(self, username, password, mac_addr):
         #create the specified account, send back confirmation of creation
         print 'received user-id: ' + username
@@ -47,43 +46,23 @@ class ServerCommunicationHandler(threading.Thread):
             self.mac_file_lists[mac_addr] = []
         if mac_addr not in self.mac_deleted_file_lists.keys():
             self.mac_deleted_file_lists[mac_addr] = []
-
-    def create_new_account(self, username, password, mac):
-        #create the specified account, send back confirmation of creation
-        print 'received user-id: ' + username
-        print 'received password: ' + password
-        print 'from MAC: ' + mac
-        # logging
         entry = LogEntry.LogEntry(username, "Created an account")
         self.log.addEntry(entry)
-        # creates account and add this username to our dictionary
-        try:
-            self.account_manager.createAccount(username, password, "TestDirName", self.account_manager.serverDirectoryId)
-            self.clients[username] = dict([(mac, list())])
-            return True
-        except:
-            return False
+        self.account_manager.createAccount(username, password, "TestDirName", self.account_manager.serverDirectoryId)
 
-    def sign_in(self, client_ip, client_port, client_mac, username, user_password):
+    def sign_in(self, client_ip, client_port, username, user_password):
         if self.account_manager.loginAccount(username, user_password): #if the login was successful
-            # Logging
             entry = LogEntry.LogEntry(username, "Logged In")
             self.log.addEntry(entry)
             if username in self.clients:#if the same username has already logged in from other ip/port
-                print "User " + username + " has logged in from other IP address, but hey you can still join using this IP and MAC!"
-                if client_mac in self.clients[username].keys(): # if the client has already logged in at least onece from this MAC address
-                    # method here should cause the client to fetch all files listed in self.clients[username][client_mac]
-                    # TODO if the client checks the list every few moments we shouldn't need to do anything here right?
-                    print "You've logged in from this MAC (" + client_mac + ") before. Welcome back!"
-                    return True
-                else: # if the client log in on this MAC for the first time
-                    # create the list, and put all files that belong to this client in there
-                    print "This is the first time you've logged in from this MAC! Welcome. Let me get you all your files..."
-                    self.client[username][client_mac] = "" # TODO here should put all files into the list
-                    return True
-            else: # if the client dictionary that maps its username to MAC hasn't been created for some reason - actually this shouldn't happen. We'll jsut return False here
-                print "Internal Problem."
-                return False
+                print "User " + username + " has logged in from other IP address, but hey you can still join using this IP!"
+                self.clients[username].append(ClientData(client_ip, client_port))
+                print self.clients
+            else: #if no client detected under this username
+                print "Welcome " + username +  " to your first log in!"
+                self.clients[username] = [ClientData(client_ip, client_port)]
+                print self.clients
+            return True
         else:
             print "Username and password don't match our database"
             print 'user name: ' + username
@@ -138,27 +117,43 @@ class ServerCommunicationHandler(threading.Thread):
                 for ma in self.username_mac_addresses[username]:
                         if not ma == mac_addr:
                             self.mac_file_lists[ma].append(folder_name)
-                return os.mkdirs(user_root_dir + folder_name)
+                return os.makedirs(user_root_dir + folder_name)
             else: return False
         else: return False
 
-    def send_file(self, filename, username, client_ip, client_port):
+    def send_files(self, username, client_ip, client_port, client_mac):
         #send a file to be copied to the local  machine
         # authenticate user
         if self.check_sign_in(username, client_ip, client_port): # if signed in
             entry = LogEntry.LogEntry("Server", "Sent File: " + filename + " to " + username )
             self.log.addEntry(entry)
-            with open(self.account_manager.getAccountDirectory(username) + filename, "rb") as handle:
-                binary_data = xmlrpclib.Binary(handle.read())
-                print "File " + filename + "sent to " + client_ip
-                return (True, binary_data)
+            ret_list = []
+            for filename in self.mac_file_lists[client_mac]:
+                if os.path.isdir(self.account_manager.getAccountDirectory(username) + filename):
+                    ret_list.append((filename, None))
+                else:
+                    with open(self.account_manager.getAccountDirectory(username) + filename, "rb") as handle:
+                        binary_data = xmlrpclib.Binary(handle.read())
+                        print "File " + filename + "sent to " + client_ip
+                        ret_list.append((filename, binary_data))
+            del self.mac_file_lists[client_mac][:]
+            return ret_list
         else:
-            return (False, "ERROR: haha you are not sign in, I wonder why you are not getting your file...")
+            return []
 
-
-    def send_deleted_file(self, file_name):
-        #send a file to be deleted from the local machine
-        print 'sent to be deleted: ' + file_name
+    def send_deleted_files(self, username, client_ip, client_port, client_mac):
+        #send a file to be copied to the local  machine
+        # authenticate user
+        if self.check_sign_in(username, client_ip, client_port): # if signed in
+            entry = LogEntry.LogEntry("Server", "Sent File: " + filename + " to " + username )
+            self.log.addEntry(entry)
+            ret_list = []
+            for filename in self.mac_deleted_file_lists[client_mac]:
+                    ret_list.append(filename)
+            del self.mac_deleted_file_lists[client_mac][:]
+            return ret_list
+        else:
+            return []
 
     def remove_folder(self, folder_name, username):
         total_folder_name = self.account_manager.getAccountDirectory(username) + folder_name
@@ -172,7 +167,6 @@ class ServerCommunicationHandler(threading.Thread):
         size_files = self.account_manager.adminFindFileSize(user_name)
         num_files = self.account_manager.adminFindFileNum(user_name)
         account_dir = self.account_manager.getAccountDirectory(user_name)
-
         print "User: " + user_name + " has " + num_files + " files totaling " + size_files + " bits in " + account_dir
 
     def get_system_information(self):

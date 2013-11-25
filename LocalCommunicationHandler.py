@@ -8,6 +8,7 @@ import rpc
 import subprocess
 from client import Client
 import os
+import shutil
 
 
 class LocalCommunicationHandler(threading.Thread):
@@ -20,7 +21,6 @@ class LocalCommunicationHandler(threading.Thread):
         self.incoming_file_names = iq
         self.incoming_deleted_files = idq
         self.file_sender = threading.Thread(target=self.sync_files)
-        self.server_listener = threading.Thread(target=self.listen)
         self.sync_on = True
         self.signed_in = False
         self.username = None
@@ -33,7 +33,6 @@ class LocalCommunicationHandler(threading.Thread):
 
     def run(self):
         self.file_sender.start()
-        self.server_listener.start()
 
     #should be pretty much complete, need to test
     def create_new_account(self, uid, pwd):
@@ -101,17 +100,29 @@ class LocalCommunicationHandler(threading.Thread):
 
     def listen(self):
         #check for and handle incoming messages from server
-        print "I'm listening"
+        #self.check_for_deleted_files()
+        self.check_for_new_files()
+
+    def check_for_deleted_files(self):
+        list_from_server = self.client.server_deleted_files()
+        for name in list_from_server:
+            self.incoming_deleted_files.put(name)
+
+    def check_for_new_files(self):
+        list_from_server = self.client.server_new_files()
+        #print list_from_server
+        for name, filedata in list_from_server:
+            self.incoming_file_names.put((name, filedata))
 
     def sync_files(self):
         while True:
             self.copy_files()
             self.delete_files()
+            self.listen()
 
     def copy_files(self):
         sleep(1)
         if self.sync_on:
-            print self.file_names
             try:
                 name = self.file_names.get(True, .1)
                 if self.sync_on: # why the second time?
@@ -133,11 +144,3 @@ class LocalCommunicationHandler(threading.Thread):
                 self.deleted_file_names.task_done()
             except Empty:
                 pass
-
-    def delete_local_files(self, name):
-        self.incoming_deleted_files.put(name)
-
-    def modify_local_files(self, f_name, f_data):
-        print f_name
-        print "I do not know what to do"
-

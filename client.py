@@ -78,6 +78,12 @@ class Client():
         else:
             return rpc.delete_file(filename, self.server_ip, self.server_port, self.username, self.ip, self.port)
 
+    def server_new_files(self):
+        return rpc.server_new_files(self.server_ip, self.server_port, self.username, self.ip, self.port, self.mac)
+
+    def server_deleted_files(self):
+        return rpc.server_deleted_files(self.server_ip, self.server_port, self.username, self.ip, self.port, self.mac)
+
     def activate(self):
         print "in activate"
         self.mark_presence()

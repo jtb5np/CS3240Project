@@ -13,7 +13,7 @@ def get_local_ip():
 
 def main():
     # TODO: reads configuration file that includes local ip, root dir, etc.
-    root_dir = "/Users/xf3da/Desktop/Account Folder"
+    root_dir = "C://Users/Jacob/Account_Folder/"
     server_ip = get_local_ip()
     port = 8002
 

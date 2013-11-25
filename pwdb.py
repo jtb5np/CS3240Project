@@ -31,7 +31,8 @@ class dbManager:
             self.conn.commit()
             #create user directory on server
             newPath = self.rootPath+`self.serverDirectoryId`
-            if not os.path.exists(newPath): os.makedirs(newPath)
+            if not os.path.exists(newPath):
+                os.makedirs(newPath)
             #increment server id
             self.serverDirectoryId += 1
             return True
