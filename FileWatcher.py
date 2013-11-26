@@ -133,6 +133,8 @@ class FileWatcher(threading.Thread):
                     os.makedirs(f)
                 except OSError:
                     pass
+                if f not in self.files:
+                        self.files.append(f)
                 if f not in self.synced_from_server:
                     self.synced_from_server.append(f)
             else:
@@ -142,8 +144,10 @@ class FileWatcher(threading.Thread):
                 try:
                     with open(f, "wb") as handle:
                         handle.write(d.data)
-                        if f not in self.synced_from_server:
-                            self.synced_from_server.append(f)
+                    if f not in self.files:
+                        self.files.append(f)
+                    if f not in self.synced_from_server:
+                        self.synced_from_server.append(f)
                 except OSError:
                     pass
             self.incoming_file_names.task_done()
