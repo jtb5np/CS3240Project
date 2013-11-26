@@ -14,9 +14,9 @@ def create_account(dest_ip, dest_port, client_mac, username, user_password):
     return rpc_connect.create_new_account(username, user_password, client_mac)
 
 
-def authenticate_user(dest_ip, dest_port, source_ip, source_port, source_mac, username, user_password):
+def authenticate_user(dest_ip, dest_port, source_ip, source_port, username, user_password):
     rpc_connect = xmlrpclib.ServerProxy("http://%s:%s/"% (dest_ip, dest_port), allow_none = True)
-    return rpc_connect.sign_in(source_ip, source_port, source_mac, username, user_password)
+    return rpc_connect.sign_in(source_ip, source_port, username, user_password)
 
 
 def push_file(filename, binary, dest_ip, dest_port, source_username, source_ip, source_port, mac_addr):
