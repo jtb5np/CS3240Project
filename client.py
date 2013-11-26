@@ -22,7 +22,7 @@ class Client():
 
     def login(self, uid, pwd):
         print "log in in process"
-        if rpc.authenticate_user(self.server_ip, self.server_port, self.ip, self.port, uid, pwd):
+        if rpc.authenticate_user(self.server_ip, self.server_port, self.ip, self.port, uid, pwd, self.mac):
             self.username = uid
             print "log in successful for user " + uid
             return True

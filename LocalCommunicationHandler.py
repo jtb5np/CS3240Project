@@ -29,6 +29,7 @@ class LocalCommunicationHandler(threading.Thread):
         self.local_port = local_port
         self.server_ip = server_ip
         self.server_port = server_port
+        self.root = root_folder
 
 
     def run(self):
@@ -48,8 +49,8 @@ class LocalCommunicationHandler(threading.Thread):
     #completed helper method
     def create_account_file(self, id, password):
         try:
-            f = open('account_info.txt', 'w')
-            f.write(id + '\n' + password)
+            f = open('account_info.txt', 'w+')
+            f.write(id + '\n' + password + '\n' + self.root)
             f.close()
             return True
         except OSError:
@@ -62,10 +63,42 @@ class LocalCommunicationHandler(threading.Thread):
         self.signed_in = self.client.login(uid, pwd)
         if self.signed_in:
             self.username = uid
+            self.clear_all_local_files()
             self.get_all_server_files()
             print 'Sign in successful'
         else:
             print "Sign in unsuccessful for user " + uid
+
+    def clear_all_local_files(self):
+        for f in self.get_files_in(self.root):
+            try:
+                if os.path.isdir(f):
+                    shutil.rmtree(f)
+                else:
+                    os.remove(f)
+            except OSError:
+                pass
+
+    def get_files_in(self, some_path_name):
+        temp_list = self.list_dir_ignore_backups(some_path_name)
+        temp_list_2 = []
+        for f in temp_list:
+            total_path_name =  some_path_name + '/' + f
+            temp_list_2.append(total_path_name)
+            if os.path.isdir(total_path_name):
+                for fi in self.get_files_in(total_path_name):
+                    temp_list_2.append(fi)
+        return temp_list_2
+
+    def list_dir_ignore_backups(self, some_path_name):
+        the_list = os.listdir(some_path_name)
+        temp_list = []
+        for f in the_list:
+            temp_list.append(f)
+        for f in temp_list:
+            if f.endswith('~') or f.startswith('.'):
+                the_list.remove(f)
+        return the_list
 
     def get_all_server_files(self):
         list_from_server = self.client.get_all_files()
@@ -92,6 +125,7 @@ class LocalCommunicationHandler(threading.Thread):
         f2 = open('account_info.txt', 'w')
         f2.write(id)
         f2.write(password)
+        f2.write(self.root)
         f2.close()
 
     # just started by Mark

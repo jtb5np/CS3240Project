@@ -22,6 +22,11 @@ class FileWatcher(threading.Thread):
         self.synced_from_server = []
 
     def run(self):
+        for f in self.get_files_in(self.path_name):
+            self.files.append(f)
+            initial_time = os.path.getmtime(f)
+            if initial_time > self.latest_time:
+                self.latest_time = initial_time
         while True:
             self.find_all_files()
             sleep(.5)
@@ -112,7 +117,7 @@ class FileWatcher(threading.Thread):
 
     def delete_local_file(self):
         try:
-            df = self.incoming_deleted_file_names.get_nowait()
+            df = self.incoming_deleted_file_names.get(True, .1)
             try:
                 if os.path.isdir(df):
                     for fi in self.get_files_in(df):
@@ -129,7 +134,7 @@ class FileWatcher(threading.Thread):
 
     def modify_local_file(self):
         try:
-            f, d = self.incoming_file_names.get_nowait()
+            f, d = self.incoming_file_names.get(True, .1)
             if d == None:
                 try:
                     os.makedirs(f)

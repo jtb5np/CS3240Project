@@ -35,11 +35,24 @@ def listen_for_connection(ch):
             connection.send(response)
 
 def main():
-    root_folder = raw_input("Enter the name of the directory you want to synchronize: ")
+    answer = ''
+    if os.path.exists('account_info.txt'):
+        answer = '2'
+        info_file = open('account_info.txt', 'r')
+        user_id = info_file.readline().rstrip('\n')
+        password = info_file.readline().rstrip('\n')
+        root_folder = info_file.readline().rstrip('\n')
+        info_file.close()
+    else:
+        while not (answer == '1' or answer == '2'):
+            answer = raw_input('Type 1 to create new account' + '\n' + 'Type 2 to sign in to existing account')
+        user_id = raw_input('Enter username: ')
+        password = raw_input('Enter password: ')
+        root_folder = raw_input("Enter the name of the directory you want to synchronize: ")
     try:
         os.mkdir(root_folder)
     except OSError:
-        print 'Thank you for already creating that directory.'
+        pass
 
     files_to_send = Queue()
     files_to_delete = Queue()
@@ -47,19 +60,22 @@ def main():
     deleted_files_to_receive = Queue()
     fwr = FileWatcher(files_to_send, files_to_delete, files_to_receive, deleted_files_to_receive, root_folder)
 
-    local_port = int(raw_input("Enter the port you want to use (from 9000 - 9999): "))
+    local_port = 9000
 
     #test script
-    server_ip = "172.25.98.30"
-    server_port = 8002
+    server_ip = raw_input('Enter server IP address: ')
+    server_port = 8000
     local_ip = get_local_ip()
 
     lch = LocalCommunicationHandler(server_ip, server_port, local_ip, local_port, root_folder, files_to_send, files_to_delete,
                                     files_to_receive, deleted_files_to_receive)
     listener_thread = threading.Thread(target=listen_for_connection, args=(lch,))
 
-    lch.create_new_account('mark', 'markspassword')
-    lch.sign_in('mark', 'markspassword')
+    if answer == '1':
+        lch.create_new_account(user_id, password)
+        lch.sign_in(user_id, password)
+    elif answer == '2':
+        lch.sign_in(user_id, password)
 
     fwr.start()
     lch.start()
