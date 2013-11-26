@@ -77,8 +77,25 @@ def main():
                         print "Creation unsuccessful, sorry!"
                 else:
                     input = str(raw_input("Passwords don't match. Try again? y/n"))
-                    # TODO unfinished here
-                    break
+                    if input == 'y':
+                        break
+                    else:
+                        forfeit = True
+        elif selection == 1:
+            username = str(raw_input("Input your desired username here: "))
+            password = str(raw_input("Input your password: "))
+            if lch.sign_in(username, password):
+                print "Sign in successful!"
+                continue
+            else:
+                print "Sign in unsuccessful, heading back to the main memu"
+                continue
+        elif selection == 2:
+            if lch.sign_out():
+                print "Sign out succee"
+            # TODO unfinished here
+
+
 
 
 
