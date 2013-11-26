@@ -41,14 +41,15 @@ def main():
         info_file = open('account_info.txt', 'r')
         user_id = info_file.readline().rstrip('\n')
         password = info_file.readline().rstrip('\n')
-        root_folder = info_file.readline().rstrip('\n')
+        #root_folder = info_file.readline().rstrip('\n')
         info_file.close()
     else:
         while not (answer == '1' or answer == '2'):
             answer = raw_input('Type 1 to create new account' + '\n' + 'Type 2 to sign in to existing account')
         user_id = raw_input('Enter username: ')
         password = raw_input('Enter password: ')
-        root_folder = raw_input("Enter the name of the directory you want to synchronize: ")
+        #root_folder = raw_input("Enter the name of the directory you want to synchronize: ")
+    root_folder = 'onedir'
     try:
         os.mkdir(root_folder)
     except OSError:

@@ -50,7 +50,7 @@ class LocalCommunicationHandler(threading.Thread):
     def create_account_file(self, id, password):
         try:
             f = open('account_info.txt', 'w+')
-            f.write(id + '\n' + password + '\n' + self.root)
+            f.write(id + '\n' + password)
             f.close()
             return True
         except OSError:
@@ -122,10 +122,9 @@ class LocalCommunicationHandler(threading.Thread):
         id = f.readline()
         f.close()
         os.remove('account_info.txt')
-        f2 = open('account_info.txt', 'w')
+        f2 = open('account_info.txt', 'w+')
         f2.write(id)
         f2.write(password)
-        f2.write(self.root)
         f2.close()
 
     # just started by Mark
