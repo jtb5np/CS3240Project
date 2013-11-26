@@ -120,20 +120,21 @@ class LocalCommunicationHandler(threading.Thread):
 
     def listen(self):
         #check for and handle incoming messages from server
-        #self.check_for_deleted_files()
-        # TODO why is check_for_deleted_files() commented out?
+        self.check_for_deleted_files()
         self.check_for_new_files()
 
     def check_for_deleted_files(self):
-        list_from_server = self.client.server_deleted_files()
-        for name in list_from_server:
-            self.incoming_deleted_files.put(name)
+        if self.sync_on:
+            list_from_server = self.client.server_deleted_files()
+            for name in list_from_server:
+                self.incoming_deleted_files.put(name)
 
     def check_for_new_files(self):
-        list_from_server = self.client.server_new_files()
-        #print list_from_server
-        for name, filedata in list_from_server:
-            self.incoming_file_names.put((name, filedata))
+        if self.sync_on:
+            list_from_server = self.client.server_new_files()
+            #print list_from_server
+            for name, filedata in list_from_server:
+                self.incoming_file_names.put((name, filedata))
 
     def sync_files(self):
         while True:

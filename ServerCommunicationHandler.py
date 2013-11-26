@@ -54,7 +54,7 @@ class ServerCommunicationHandler(threading.Thread):
             self.mac_deleted_file_lists[mac_addr] = []
         entry = LogEntry.LogEntry(username, "Created an account")
         self.log.addEntry(entry)
-        self.account_manager.createAccount(username, password, "TestDirName", self.account_manager.serverDirectoryId)
+        self.account_manager.createAccount(username, password, "")
 
     def get_files_in(self, some_path_name):
         temp_list = self.list_dir_ignore_backups(some_path_name)
@@ -191,10 +191,10 @@ class ServerCommunicationHandler(threading.Thread):
         #send a file to be copied to the local  machine
         # authenticate user
         if self.check_sign_in(username, client_ip, client_port): # if signed in
-            entry = LogEntry.LogEntry("Server", "Sent File: " + filename + " to " + username )
-            self.log.addEntry(entry)
             ret_list = []
             for filename in self.mac_file_lists[client_mac]:
+                entry = LogEntry.LogEntry("Server", "Sent File: " + filename + " to " + username )
+                self.log.addEntry(entry)
                 if os.path.isdir(self.account_manager.getAccountDirectory(username) + filename):
                     ret_list.append((filename, None))
                     entry = LogEntry.LogEntry("Server", "Sent File: " + filename + " to " + username )
@@ -225,14 +225,6 @@ class ServerCommunicationHandler(threading.Thread):
         else:
             return []
 
-    def remove_folder(self, folder_name, username):
-        total_folder_name = self.account_manager.getAccountDirectory(username) + folder_name
-        if os.path.exists(total_folder_name):
-            os.rmdir(total_folder_name)
-            return True
-        else:
-            return False
-
     def get_user_information(self,user_name):
         size_files = self.account_manager.adminFindFileSize(user_name)
         num_files = self.account_manager.adminFindFileNum(user_name)
@@ -259,28 +251,37 @@ class ServerCommunicationHandler(threading.Thread):
         self.log.addEntry(entry)
         print "server activated, server alive: " + str(server_wait.isAlive()) + ". Server IP: " + self.ip
 
-    def delete_file(self, filename, username, mac_addr):
+    def delete_file(self, filename, username, mac_addr, client_ip, client_port):
         #use the user_id to find where the file should be stored (within the base folder)
-        print filename
-        print username
-        total_file_name = self.account_manager.getAccountDirectory(username) + filename
-        print "Total_file_name = " + total_file_name
-        try:
-            for ma in self.username_mac_addresses[username]:
-                if filename in self.mac_file_lists[ma]:
-                    self.mac_file_lists[ma].remove(filename)
-                if not ma == mac_addr:
-                    self.mac_deleted_file_lists[ma].append(filename)
-            if os.path.isdir(total_file_name):
-                print "Trying to remove folder" + total_file_name
-                shutil.rmtree(total_file_name)
-                print "YAY Folder Removed"
-                return True
-            else:
-                print "Trying to remove file" + total_file_name
-                os.remove(total_file_name)
-                print "YAY File removed"
+        if self.check_sign_in(client_ip, client_port):
+            print filename
+            print username
+            total_file_name = self.account_manager.getAccountDirectory(username) + filename
+            print "Total_file_name = " + total_file_name
+            try:
+                for ma in self.username_mac_addresses[username]:
+                    if os.path.isdir(total_file_name):
+                        file_list = self.get_files_in(total_file_name)
+                        for f in file_list:
+                            f_stripped = f.replace(self.account_manager.getAccountDirectory(username), '')
+                            if f_stripped in self.mac_file_lists[ma]:
+                                self.mac_file_lists[ma].remove(f_stripped)
+                    if filename in self.mac_file_lists[ma]:
+                        self.mac_file_lists[ma].remove(filename)
+                    if not ma == mac_addr:
+                        self.mac_deleted_file_lists[ma].append(filename)
+                if os.path.isdir(total_file_name):
+                    print "Trying to remove folder" + total_file_name
+                    shutil.rmtree(total_file_name)
+                    print "YAY Folder Removed"
+                    return True
+                else:
+                    print "Trying to remove file" + total_file_name
+                    os.remove(total_file_name)
+                    print "YAY File removed"
+                    return False
+            except OSError:
+                print "Nope dude"
                 return False
-        except OSError:
-            print "Nope dude"
+        else:
             return False
