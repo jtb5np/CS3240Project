@@ -26,13 +26,16 @@ class Client():
 
     def login(self, uid, pwd):
         print "log in in process"
-        if rpc.authenticate_user(self.server_ip, self.server_port, self.ip, self.port, self.mac, uid, pwd):
+        if rpc.authenticate_user(self.server_ip, self.server_port, self.ip, self.port, uid, pwd):
             self.username = uid
             print "log in successful for user " + uid
             return True
         else:
             print "log in unsuccessful, please retry"
             return False
+
+    def get_all_files(self):
+        return rpc.get_all_files(self.server_ip, self.server_port, self.username, self.ip, self.port)
 
     def sign_out(self):
         print "Client is trying to sign out..."

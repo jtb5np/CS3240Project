@@ -30,12 +30,14 @@ def mark_presence(dest_ip, dest_port, source_ip, source_port):
     rpc_connect.mark_presence(source_ip, source_port)
 
 def create_account(dest_ip, dest_port, client_mac, username, user_password):
+    print "in RPC create_account"
     rpc_connect = xmlrpclib.ServerProxy("http://%s:%s/"% (dest_ip, dest_port), allow_none = True)
-    return rpc_connect.create_new_account(username, user_password, client_mac)
+    print "rpc_connect created"
+    return rpc_connect.create_new_account(username, user_password, str(client_mac))
 
-def authenticate_user(dest_ip, dest_port, source_ip, source_port, source_mac, username, user_password):
+def authenticate_user(dest_ip, dest_port, source_ip, source_port, username, user_password):
     rpc_connect = xmlrpclib.ServerProxy("http://%s:%s/"% (dest_ip, dest_port), allow_none = True)
-    return rpc_connect.sign_in(source_ip, source_port, source_mac, username, user_password)
+    return rpc_connect.sign_in(source_ip, source_port, username, user_password)
 
 def lock_file(filename, dest_ip, dest_port, source_ip, source_port):
     rpc_connect = xmlrpclib.ServerProxy("http://%s:%s/"% (dest_ip, dest_port), allow_none = True)
@@ -60,16 +62,21 @@ def push_folder(folder_name, dest_ip, dest_port, source_username, source_ip, sou
 
 def server_new_files(dest_ip, dest_port, source_username, source_ip, source_port, mac_addr):
     rpc_connect = xmlrpclib.ServerProxy("http://%s:%s/"% (dest_ip, dest_port), allow_none = True)
-    return rpc_connect.send_files(source_username, source_ip, source_port, mac_addr)
+    return rpc_connect.send_files(source_username, source_ip, source_port, str(mac_addr))
 
-def server_deleted_files():
+def server_deleted_files(dest_ip, dest_port,source_username, source_ip, source_port, mac_addr):
     rpc_connect = xmlrpclib.ServerProxy("http://%s:%s/"% (dest_ip, dest_port), allow_none = True)
-    return rpc_connect.send_deleted_files(source_username, source_ip, source_port, mac_addr)
+    return rpc_connect.send_deleted_files(source_username, source_ip, source_port, str(mac_addr))
 
 def delete_folder(folder_name, dest_ip, dest_port, source_username, source_ip, source_port):
     rpc_connect = xmlrpclib.ServerProxy("http://%s:%s/"% (dest_ip, dest_port), allow_none = True)
     return rpc_connect.remove_folder(folder_name, source_username)
 
+def get_all_files(dest_ip, dest_port, source_username, source_ip, source_port):
+    rpc_connect = xmlrpclib.ServerProxy("http://%s:%s/"% (dest_ip, dest_port), allow_none = True)
+    return rpc_connect.get_all_files(source_username, source_ip, source_port)
+
 def sign_out(dest_ip, dest_port, source_username, source_ip, source_port):
     rpc_connect = xmlrpclib.ServerProxy("http://%s:%s/"% (dest_ip, dest_port), allow_none = True)
     return rpc_connect.sign_out(source_username, source_ip, source_port)
+

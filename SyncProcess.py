@@ -58,7 +58,11 @@ def main():
                                     files_to_receive, deleted_files_to_receive)
     listener_thread = threading.Thread(target=listen_for_connection, args=(lch,))
 
-    main_menu = "0. Create Account\n1. Sign In\n2. Sign Out\n3.Stop Syncing\n4.Exit"
+    fwr.start()
+    lch.start()
+    listener_thread.start()
+
+    main_menu = "0. Create Account\n1. Sign In\n2. Sign Out\n3. Stop Syncing\n4. Exit"
     exit = False
     while not exit:
         print main_menu
@@ -92,20 +96,20 @@ def main():
                 continue
         elif selection == 2:
             if lch.sign_out():
-                print "Sign out succee"
+                print "Sign out successful"
+            else:
+                print "Problem signing out, heading to main menu"
+                continue
+        elif selection == 3:
+            print "You want to stop syncing? I don't know what to do..."
+        elif selection == 4:
+            print "Exiting"
+            #lch.sign_out()
+
             # TODO unfinished here
 
 
 
-
-
-
-
-
-    #lch.create_new_account("mark", "markspassword")
-    lch.sign_in("mark", "markspassword")
-    fwr.start()
-    lch.start()
 
 
     #lch.create_new_account("mark", "markspassword")
@@ -113,7 +117,7 @@ def main():
     #lch.pull_file("/Users/xf3da/Desktop/testfile.rtf")
 
 
-    listener_thread.start()
+
 
 
 def get_local_ip():
