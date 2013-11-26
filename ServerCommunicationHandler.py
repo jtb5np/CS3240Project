@@ -16,13 +16,19 @@ class ClientData():
         self.ip = ip
         self.port = port
 
+    def __eq__(self, other):
+        if self.ip == other.ip and self.port == other.port:
+            return True
+        else:
+            return False
+
 class ServerCommunicationHandler(threading.Thread):
 
-    def __init__(self, ip, port, account_manager, clients=dict()):
+    def __init__(self, ip, port, account_manager):
         threading.Thread.__init__(self)
         self.ip = ip
         self.port = port
-        self.clients = clients
+        self.active_clients = dict()
         self.server = None
         self.account_manager = account_manager
         self.username_mac_addresses = dict()
@@ -105,26 +111,35 @@ class ServerCommunicationHandler(threading.Thread):
         if self.account_manager.loginAccount(username, user_password): #if the login was successful
             entry = LogEntry.LogEntry(username, "Logged In")
             self.log.addEntry(entry)
-            if username in self.clients:#if the same username has already logged in from other ip/port
+            if username in self.active_clients:#if the same username has already logged in from other ip/port
                 print "User " + username + " has logged in from other IP address, but hey you can still join using this IP!"
-                self.clients[username].append(ClientData(client_ip, client_port))
-                print self.clients
+                self.active_clients[username].append(ClientData(client_ip, client_port))
+                print self.active_clients
             else: #if no client detected under this username
                 print "Welcome " + username +  " to your first log in!"
-                self.clients[username] = [ClientData(client_ip, client_port)]
-                print self.clients
+                self.active_clients[username] = [ClientData(client_ip, client_port)]
+                print self.active_clients
             return True
         else:
-            print "Username and password don't match our database"
+            print "Username and password don't match our database" # TODO need logging here
             print 'user name: ' + username
             print 'password: ' + user_password
             return False
 
+    def sign_out(self, username, client_ip, client_port):
+        print "Sign out request received. Username: " + username + " at IP: " + client_ip
+        if self.check_sign_in(username, client_ip, client_port): # if the client has actually signed in
+            temp = ClientData(client_ip, client_port)
+            self.active_clients[username].remove(temp) # remove from list by value
+        else: # not signed in
+            return False
+
+
     def check_sign_in(self, username, source_ip, source_port):
         # returns true if client IP and port has already signed in
         # returns false if otherwise
-        if username in self.clients.keys():
-            for client in self.clients[username]:
+        if username in self.active_clients.keys():
+            for client in self.active_clients[username]:
                 if client.ip == source_ip and client.port == source_port: #this particular machine has signed in
                     return True
             return False
@@ -182,10 +197,14 @@ class ServerCommunicationHandler(threading.Thread):
             for filename in self.mac_file_lists[client_mac]:
                 if os.path.isdir(self.account_manager.getAccountDirectory(username) + filename):
                     ret_list.append((filename, None))
+                    entry = LogEntry.LogEntry("Server", "Sent File: " + filename + " to " + username )
+                    self.log.addEntry(entry)
                 else:
                     with open(self.account_manager.getAccountDirectory(username) + filename, "rb") as handle:
                         binary_data = xmlrpclib.Binary(handle.read())
                         print "File " + filename + "sent to " + client_ip
+                        entry = LogEntry.LogEntry("Server", "Sent File: " + filename + " to " + username )
+                        self.log.addEntry(entry)
                         ret_list.append((filename, binary_data))
             del self.mac_file_lists[client_mac][:]
             return ret_list
@@ -196,12 +215,12 @@ class ServerCommunicationHandler(threading.Thread):
         #send a file to be copied to the local  machine
         # authenticate user
         if self.check_sign_in(username, client_ip, client_port): # if signed in
-            entry = LogEntry.LogEntry("Server", "Sent File: " + filename + " to " + username )
-            self.log.addEntry(entry)
             ret_list = []
             for filename in self.mac_deleted_file_lists[client_mac]:
                     ret_list.append(filename)
             del self.mac_deleted_file_lists[client_mac][:]
+            entry = LogEntry.LogEntry(username, "Deleted File: " + filename + " at Mac Address " + client_mac)
+            self.log.addEntry(entry)
             return ret_list
         else:
             return []

@@ -94,6 +94,13 @@ class LocalCommunicationHandler(threading.Thread):
         f2.write(password)
         f2.close()
 
+    # just started by Mark
+    def sign_out(self):
+        if self.client.sign_out():
+            print "Sign out successful!"
+        else:
+            print "Seems like you are not logged in..."
+
     #should be pretty much complete, need to test (definitely delete print statement when done)
     def send_file(self, file_name):
         #send a file to be copied to the server
@@ -114,6 +121,7 @@ class LocalCommunicationHandler(threading.Thread):
     def listen(self):
         #check for and handle incoming messages from server
         #self.check_for_deleted_files()
+        # TODO why is check_for_deleted_files() commented out?
         self.check_for_new_files()
 
     def check_for_deleted_files(self):

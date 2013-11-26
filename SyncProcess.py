@@ -50,7 +50,7 @@ def main():
     local_port = int(raw_input("Enter the port you want to use (from 9000 - 9999): "))
 
     #test script
-    server_ip = "172.25.45.137"
+    server_ip = "172.25.98.30"
     server_port = 8002
     local_ip = get_local_ip()
 

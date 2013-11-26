@@ -19,11 +19,8 @@ def main():
 
     #creating communication handler
     account_manager = dbManager(root_dir)
-    client_info = dict()
 
-    print client_info
-
-    server_comm = ServerCommunicationHandler.ServerCommunicationHandler(server_ip, port, account_manager, client_info)
+    server_comm = ServerCommunicationHandler.ServerCommunicationHandler(server_ip, port, account_manager)
 
 
 
