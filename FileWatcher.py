@@ -115,7 +115,7 @@ class FileWatcher(threading.Thread):
             df = self.incoming_deleted_file_names.get_nowait()
             try:
                 if os.path.isdir(df):
-                    for fi in get_files_in(df):
+                    for fi in self.get_files_in(df):
                         self.files.remove(fi)
                     shutil.rmtree(df)
                 else:
