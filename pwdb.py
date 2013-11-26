@@ -13,12 +13,16 @@ class dbManager:
             self.c = self.conn.cursor()
             self.c.execute('''CREATE TABLE user (user_name TEXT PRIMARY KEY, password TEXT, salt TEXT, directory_name TEXT, serverId INTEGER)''')
 
+
     #creating Account:
     def createAccount(self, user_name, password, directory_name):
         #need to check if account details do not already exist
         self.conn = sqlite3.connect(self.rootPath+'passwords.db')
         self.conn.text_factory = str
         self.c = self.conn.cursor()
+
+        print "     in dbManager createAccount before execute"
+
         self.c.execute('''SELECT user_name FROM user WHERE user_name=?''', (user_name,))
         attemptedUser = self.c.fetchall()
         if len(attemptedUser) == 0:

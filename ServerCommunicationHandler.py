@@ -41,20 +41,23 @@ class ServerCommunicationHandler(threading.Thread):
 
         
     def create_new_account(self, username, password, mac_addr):
-        #create the specified account, send back confirmation of creation
-        print 'received user-id: ' + username
-        print 'received password: ' + username
+        #create the specified account, send back confirmation of creation]
         if username in self.username_mac_addresses.keys():
             self.username_mac_addresses[username].append(mac_addr)
+            return False
         else:
             self.username_mac_addresses[username] = [mac_addr]
+
         if mac_addr not in self.mac_file_lists.keys():
             self.mac_file_lists[mac_addr] = []
+
         if mac_addr not in self.mac_deleted_file_lists.keys():
             self.mac_deleted_file_lists[mac_addr] = []
         entry = LogEntry.LogEntry(username, "Created an account")
         self.log.addEntry(entry)
+        print "create_new_account before account_manager"
         self.account_manager.createAccount(username, password, "")
+        return True
 
     def get_files_in(self, some_path_name):
         temp_list = self.list_dir_ignore_backups(some_path_name)
@@ -86,14 +89,15 @@ class ServerCommunicationHandler(threading.Thread):
             self.log.addEntry(entry)
             ret_list = [self.get_most_recent_timestamp(username)]
             for filename in self.get_files_in(self.account_manager.getAccountDirectory(username)):
-                print filename
-                # if os.path.isdir(self.account_manager.getAccountDirectory(username) + filename):
-                #     ret_list.append((filename, None))
-                # else:
-                #     with open(self.account_manager.getAccountDirectory(username) + filename, "rb") as handle:
-                #         binary_data = xmlrpclib.Binary(handle.read())
-                #         print "File " + filename + "sent to " + client_ip
-                #         ret_list.append((filename, binary_data))
+                f_stripped = filename.replace(self.account_manager.getAccountDirectory(username) + '/', '')
+                print f_stripped
+                if os.path.isdir(filename):
+                    ret_list.append((f_stripped, None))
+                else:
+                    with open(filename, "rb") as handle:
+                         binary_data = xmlrpclib.Binary(handle.read())
+                         print "File " + filename + "sent to " + client_ip
+                         ret_list.append((f_stripped, binary_data))
             return ret_list
         else:
             return []
@@ -107,10 +111,22 @@ class ServerCommunicationHandler(threading.Thread):
                 latest_time = time
         return latest_time
 
-    def sign_in(self, client_ip, client_port, username, user_password):
+    def sign_in(self, client_ip, client_port, username, user_password, client_mac):
+        print "In ServerCommunicationHandler sign_in()"
         if self.account_manager.loginAccount(username, user_password): #if the login was successful
             entry = LogEntry.LogEntry(username, "Logged In")
             self.log.addEntry(entry)
+            if username in self.username_mac_addresses.keys():
+                self.username_mac_addresses[username].append(client_mac)
+            else:
+                self.username_mac_addresses[username] = [client_mac]
+
+            if client_mac not in self.mac_file_lists.keys():
+                self.mac_file_lists[client_mac] = []
+
+            if client_mac not in self.mac_deleted_file_lists.keys():
+                self.mac_deleted_file_lists[client_mac] = []
+
             if username in self.active_clients:#if the same username has already logged in from other ip/port
                 print "User " + username + " has logged in from other IP address, but hey you can still join using this IP!"
                 self.active_clients[username].append(ClientData(client_ip, client_port))
