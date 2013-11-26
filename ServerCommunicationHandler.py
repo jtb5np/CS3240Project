@@ -251,7 +251,7 @@ class ServerCommunicationHandler(threading.Thread):
         self.log.addEntry(entry)
         print "server activated, server alive: " + str(server_wait.isAlive()) + ". Server IP: " + self.ip
 
-    def delete_file(self, filename, username, mac_addr, client_ip, client_port):
+    def delete_file(self, filename, username, client_ip, client_port, mac_addr):
         #use the user_id to find where the file should be stored (within the base folder)
         if self.check_sign_in(client_ip, client_port):
             print filename
