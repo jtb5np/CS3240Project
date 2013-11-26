@@ -113,11 +113,14 @@ class FileWatcher(threading.Thread):
     def delete_local_file(self):
         try:
             df = self.incoming_deleted_file_names.get_nowait()
-            if os.path.isdir(df):
-                shutil.rmtree(df)
-            else:
-                os.remove(df)
-            self.files.remove(df)
+            try:
+                if os.path.isdir(df):
+                    shutil.rmtree(df)
+                else:
+                    os.remove(df)
+                self.files.remove(df)
+            except Exception:
+                pass
             self.incoming_deleted_file_names.task_done()
         except Empty:
             pass
@@ -126,7 +129,10 @@ class FileWatcher(threading.Thread):
         try:
             f, d = self.incoming_file_names.get_nowait()
             if d == None:
-                os.makedirs(f)
+                try:
+                    os.makedirs(f)
+                except OSError:
+                    pass
                 if f not in self.synced_from_server:
                     self.synced_from_server.append(f)
             else:
