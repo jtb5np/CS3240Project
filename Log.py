@@ -7,9 +7,8 @@ class Log:
 
 
     def __init__(self, history = []):
-
         self.log = history
-        log_file = open("log.txt")
+        self.log_file = open("log.txt", "w")
 
     def addEntry(self, entry):
 
@@ -28,8 +27,7 @@ class Log:
                 x.printLogEntry()
 
     def update_log_file(self,entry):
-
-        self.log_file.write(entry.printLogEntry())
+        self.log_file.write(str(entry.printLogEntry()))
 
     def get_actor_activity(self,actor):
 
