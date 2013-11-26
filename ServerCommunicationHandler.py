@@ -218,9 +218,10 @@ class ServerCommunicationHandler(threading.Thread):
             ret_list = []
             for filename in self.mac_deleted_file_lists[client_mac]:
                     ret_list.append(filename)
+                    entry = LogEntry.LogEntry(username, "Deleted File: " + filename + " at Mac Address " + client_mac)
+                    self.log.addEntry(entry)
             del self.mac_deleted_file_lists[client_mac][:]
-            entry = LogEntry.LogEntry(username, "Deleted File: " + filename + " at Mac Address " + client_mac)
-            self.log.addEntry(entry)
+
             return ret_list
         else:
             return []
@@ -253,7 +254,7 @@ class ServerCommunicationHandler(threading.Thread):
 
     def delete_file(self, filename, username, client_ip, client_port, mac_addr):
         #use the user_id to find where the file should be stored (within the base folder)
-        if self.check_sign_in(client_ip, client_port):
+        if self.check_sign_in(username, client_ip, client_port):
             print filename
             print username
             total_file_name = self.account_manager.getAccountDirectory(username) + filename
