@@ -66,8 +66,17 @@ class LocalCommunicationHandler(threading.Thread):
             self.clear_all_local_files()
             self.get_all_server_files()
             print 'Sign in successful'
+            return True
         else:
             print "Sign in unsuccessful for user " + uid
+            return False
+
+    def change_password(self, new_password):
+        if self.signed_in: # the user can only change password if he/she is signed in
+            return self.client.change_password(new_password)
+        else:
+            print "ERROR: The user is not logged in."
+            return False
 
     def clear_all_local_files(self):
         for f in self.get_files_in(self.root):
@@ -131,8 +140,11 @@ class LocalCommunicationHandler(threading.Thread):
     def sign_out(self):
         if self.client.sign_out():
             print "Sign out successful!"
+            self.signed_in = False
+            return True
         else:
-            print "Seems like you are not logged in..."
+            print "Seems like you are not logged in anyway..."
+            return False
 
     #should be pretty much complete, need to test (definitely delete print statement when done)
     def send_file(self, file_name):
@@ -157,27 +169,31 @@ class LocalCommunicationHandler(threading.Thread):
         self.check_for_new_files()
 
     def check_for_deleted_files(self):
-        if self.sync_on:
+        #if self.sync_on:
+        if self.signed_in:
             list_from_server = self.client.server_deleted_files()
             for name in list_from_server:
                 self.incoming_deleted_files.put(name)
 
     def check_for_new_files(self):
-        if self.sync_on:
+        #if self.sync_on:
+        if self.signed_in:
             list_from_server = self.client.server_new_files()
             #print list_from_server
             for name, filedata in list_from_server:
                 self.incoming_file_names.put((name, filedata))
 
     def sync_files(self):
-        while True:
+        #while True:
+        while self.signed_in:
             self.copy_files()
             self.delete_files()
             self.listen()
 
     def copy_files(self):
         sleep(1)
-        if self.sync_on:
+        #if self.sync_on:
+        if self.signed_in:
             try:
                 name = self.file_names.get(True, .1)
                 if self.sync_on: # why the second time?
@@ -189,7 +205,8 @@ class LocalCommunicationHandler(threading.Thread):
                 pass
 
     def delete_files(self):
-        if self.sync_on:
+        #if self.sync_on:
+        if self.signed_in:
             try:
                 name = self.deleted_file_names.get(True, .1)
                 if self.sync_on:

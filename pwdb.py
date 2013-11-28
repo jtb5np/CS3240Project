@@ -20,9 +20,6 @@ class dbManager:
         self.conn = sqlite3.connect(self.rootPath+'passwords.db')
         self.conn.text_factory = str
         self.c = self.conn.cursor()
-
-        print "     in dbManager createAccount before execute"
-
         self.c.execute('''SELECT user_name FROM user WHERE user_name=?''', (user_name,))
         attemptedUser = self.c.fetchall()
         if len(attemptedUser) == 0:

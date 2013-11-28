@@ -19,6 +19,16 @@ def authenticate_user(dest_ip, dest_port, source_ip, source_port, username, user
     return rpc_connect.sign_in(source_ip, source_port, username, user_password, mac_addr)
 
 
+def sign_out(dest_ip, dest_port, source_ip, source_port, username):
+    rpc_connect = xmlrpclib.ServerProxy("http://%s:%s/"% (dest_ip, dest_port), allow_none = True)
+    return rpc_connect.sign_out(username, source_ip, source_port)
+
+
+def change_password(dest_ip, dest_port, source_ip, source_port, username, new_password):
+    rpc_connect = xmlrpclib.ServerProxy("http://%s:%s/"% (dest_ip, dest_port), allow_none = True)
+    return rpc_connect.change_password(username, new_password, source_ip, source_port)
+
+
 def push_file(filename, binary, dest_ip, dest_port, source_username, source_ip, source_port, mac_addr):
     #use username, ip, or port to validate, I guess
     rpc_connect = xmlrpclib.ServerProxy("http://%s:%s/"% (dest_ip, dest_port), allow_none = True)

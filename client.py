@@ -30,6 +30,12 @@ class Client():
             print "log in unsuccessful, please retry"
             return False
 
+    def change_password(self, new_password):
+        return rpc.change_password(self.server_ip, self.server_port, self.ip, self.port, self.username, new_password)
+
+    def sign_out(self):
+        return rpc.sign_out(self.server_ip, self.server_port, self.ip, self.port, self.username)
+
     def get_all_files(self):
         return rpc.get_all_files(self.server_ip, self.server_port, self.username, self.ip, self.port)
 

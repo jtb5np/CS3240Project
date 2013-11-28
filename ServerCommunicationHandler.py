@@ -38,7 +38,6 @@ class ServerCommunicationHandler(threading.Thread):
         entry = LogEntry.LogEntry("Admin", "Created Server")
         self.log.addEntry(entry)
         self.start_server()
-
         
     def create_new_account(self, username, password, mac_addr):
         #create the specified account, send back confirmation of creation]
@@ -47,12 +46,10 @@ class ServerCommunicationHandler(threading.Thread):
             return False
         else:
             self.username_mac_addresses[username] = [mac_addr]
-
-        if mac_addr not in self.mac_file_lists.keys():
-            self.mac_file_lists[mac_addr] = []
-
-        if mac_addr not in self.mac_deleted_file_lists.keys():
-            self.mac_deleted_file_lists[mac_addr] = []
+            if mac_addr not in self.mac_file_lists.keys():
+                self.mac_file_lists[mac_addr] = []
+            if mac_addr not in self.mac_deleted_file_lists.keys():
+                self.mac_deleted_file_lists[mac_addr] = []
         entry = LogEntry.LogEntry(username, "Created an account")
         self.log.addEntry(entry)
         print "create_new_account before account_manager"
@@ -147,9 +144,17 @@ class ServerCommunicationHandler(threading.Thread):
         if self.check_sign_in(username, client_ip, client_port): # if the client has actually signed in
             temp = ClientData(client_ip, client_port)
             self.active_clients[username].remove(temp) # remove from list by value
+            print self.active_clients[username]
+            return True
         else: # not signed in
             return False
 
+    def change_password(self, username, new_password, client_ip, client_port):
+        print "Commencing changing password for user " + username + ", changing password to " + new_password
+        if self.check_sign_in(username, client_ip, client_port):
+            return self.account_manager.changePassword(username, new_password)
+        else:
+            return False
 
     def check_sign_in(self, username, source_ip, source_port):
         # returns true if client IP and port has already signed in

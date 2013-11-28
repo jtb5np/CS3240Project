@@ -64,7 +64,8 @@ def main():
     local_port = 9000
 
     #test script
-    server_ip = raw_input('Enter server IP address: ')
+    # server_ip = raw_input('Enter server IP address: ') TODO temporary disabled
+    server_ip = "192.168.146.15"
     server_port = 8000
     local_ip = get_local_ip()
 
@@ -72,17 +73,38 @@ def main():
                                     files_to_receive, deleted_files_to_receive)
     listener_thread = threading.Thread(target=listen_for_connection, args=(lch,))
 
+
+    signed_in = False
     if answer == '1':
-        lch.create_new_account(user_id, password)
-        lch.sign_in(user_id, password)
+        if lch.create_new_account(user_id, password):
+            if lch.sign_in(user_id, password):
+                signed_in = True
+                print "Sign in successful!"
+            else:
+                print "ERROR: Sign in unsuccessful"
+        else:
+            print "ERROR: Creating account unsuccessful"
     elif answer == '2':
-        lch.sign_in(user_id, password)
+        if lch.sign_in(user_id, password):
+            signed_in = True
+            print "Sign in successful!"
+        else:
+            print "ERROR: Sign in unsuccessful"
 
-    fwr.start()
-    lch.start()
-    listener_thread.start()
+    if signed_in:
+        fwr.start()
+        lch.start()
+        listener_thread.start()
+    else:
+        print "Exiting..."
 
-    # main_menu = "0. Create Account\n1. Sign In\n2. Sign Out\n3. Stop Syncing\n4. Exit"
+    lch.sign_out()
+    if lch.sign_in("mark", "password"):
+        print "HAHA!"
+    else:
+        print "Oops"
+
+    # main_menu = "1. Change Password\n2. Sign Out\n3. Stop Syncing\n4. Exit"
     # exit = False
     # while not exit:
     #     print main_menu
