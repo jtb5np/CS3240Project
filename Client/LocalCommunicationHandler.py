@@ -60,6 +60,14 @@ class LocalCommunicationHandler(threading.Thread):
         #if sign in successful, return True; otherwise, return False
         self.signed_in = self.client.login(uid, pwd)
         if self.signed_in:
+            if not os.path.exists('Client/account_info.txt'):
+                # if sign in for the first time
+                try:
+                    f = open('Client/account_info.txt', 'w+')
+                    f.write(uid + '\n' + pwd)
+                    f.close()
+                except OSError:
+                    return False
             self.username = uid
             self.clear_all_local_files()
             self.get_all_server_files()
@@ -125,11 +133,11 @@ class LocalCommunicationHandler(threading.Thread):
 
     #completed helper method
     def change_password_file(self, password):
-        f = open('account_info.txt', 'r')
+        f = open('Client/account_info.txt', 'r')
         id = f.readline()
         f.close()
-        os.remove('account_info.txt')
-        f2 = open('account_info.txt', 'w+')
+        os.remove('Client/account_info.txt')
+        f2 = open('Client/account_info.txt', 'w+')
         f2.write(id)
         f2.write(password)
         f2.close()

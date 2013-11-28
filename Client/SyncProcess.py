@@ -37,11 +37,9 @@ def listen_for_connection(ch):
 
 def main():
     answer = ''
-    root_path_to_client = os.getcwd()
-    print root_path_to_client
-    if os.path.exists(root_path_to_client + '/Client/account_info.txt'):
+    if os.path.exists('Client/account_info.txt'):
         answer = '2'
-        info_file = open(root_path_to_client + '/Client/account_info.txt', 'r')
+        info_file = open('Client/account_info.txt', 'r')
         user_id = info_file.readline().rstrip('\n')
         password = info_file.readline().rstrip('\n')
         #root_folder = info_file.readline().rstrip('\n')
@@ -99,6 +97,7 @@ def main():
         listener_thread.start()
     else:
         print "Exiting..."
+        exit_client(lch, fwr, listener_thread)
 
 
     main_menu = "1. Change Password\n2. Sign Out\n3. Sign Out and Exit"
@@ -131,14 +130,15 @@ def main():
                 print "ERROR: Sign out unsuccessful"
 
     # Exiting procedure
-    lch._Thread__stop()
-    fwr._Thread__stop()
-    listener_thread._Thread__stop()
+
+
+
+def exit_client(lch = None, fwr = None, listener_thread = None):
+    if lch is not None: lch._Thread__stop()
+    if fwr is not None: fwr._Thread__stop()
+    if listener_thread is not None: listener_thread._Thread__stop()
     print "Exited."
     sys.exit(0)
-
-
-
 
 
 def get_local_ip():

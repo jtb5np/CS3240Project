@@ -70,6 +70,11 @@ class dbManager:
             userSalt = result[1]
             #encrypt given password and compare
             hashed_GivenPw = hashlib.sha512(password+userSalt).hexdigest()
+
+            print hashed_GivenPw
+            print userHash
+
+
             if(userHash == hashed_GivenPw):
                 #sucess
                 return True
