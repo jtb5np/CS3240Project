@@ -8,9 +8,7 @@ import logging
 
 
 def create_account(dest_ip, dest_port, client_mac, username, user_password):
-    print "in RPC create_account"
     rpc_connect = xmlrpclib.ServerProxy("http://%s:%s/"% (dest_ip, dest_port), allow_none = True)
-    print "rpc_connect created"
     return rpc_connect.create_new_account(username, user_password, client_mac)
 
 
@@ -30,7 +28,6 @@ def change_password(dest_ip, dest_port, source_ip, source_port, username, new_pa
 
 
 def push_file(filename, binary, dest_ip, dest_port, source_username, source_ip, source_port, mac_addr):
-    #use username, ip, or port to validate, I guess
     rpc_connect = xmlrpclib.ServerProxy("http://%s:%s/"% (dest_ip, dest_port), allow_none = True)
     return rpc_connect.receive_file(filename, binary, source_username, source_ip, source_port, mac_addr)
 

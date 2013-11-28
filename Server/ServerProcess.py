@@ -1,8 +1,10 @@
 __author__ = 'Mark Fang'
 
-import ServerCommunicationHandler
-from pwdb import *
 import socket
+
+import ServerCommunicationHandler
+from Server.pwdb import *
+
 
 def get_local_ip():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)

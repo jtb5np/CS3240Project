@@ -1,4 +1,4 @@
-import LogEntry
+from Server import LogEntry
 
 __author__ = 'wil'
 

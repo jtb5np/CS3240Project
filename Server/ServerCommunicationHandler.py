@@ -1,12 +1,11 @@
 __author__ = 'Jacob and Mark'
 
 import threading
-from Queue import *
-from pwdb import *
-from SimpleXMLRPCServer import SimpleXMLRPCServer, SimpleXMLRPCRequestHandler
-from time import sleep
+from SimpleXMLRPCServer import SimpleXMLRPCServer
 import xmlrpclib
 import shutil
+
+from Server.pwdb import *
 import Log
 import LogEntry
 

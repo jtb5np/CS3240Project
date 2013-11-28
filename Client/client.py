@@ -1,9 +1,7 @@
+from Client import rpc
+
 __author__ = 'xf3da'
 
-import time
-import rpc
-import subprocess
-from xmlrpclib import *
 import xmlrpclib
 import os
 from uuid import getnode as get_mac

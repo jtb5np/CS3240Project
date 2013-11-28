@@ -2,13 +2,11 @@ __author__ = 'Jacob'
 
 import threading
 from Queue import *
-import xmlrpclib
 from time import sleep
-import rpc
-import subprocess
-from client import Client
 import os
 import shutil
+
+from Client.client import Client
 
 
 class LocalCommunicationHandler(threading.Thread):
