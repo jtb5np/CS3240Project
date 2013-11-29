@@ -128,8 +128,13 @@ class LocalCommunicationHandler(threading.Thread):
         #if password is successfully changed, change password in text file and return True
         #else, return False
         print 'sent password: ' + pwd
-        self.change_password_file(pwd)
-        return True
+        if self.client.change_password(pwd):
+            self.change_password_file(pwd)
+            print "Password changed to: " + pwd
+            return True
+        else:
+            print "ERROR: password unchanged."
+            return False
 
     #completed helper method
     def change_password_file(self, password):

@@ -116,7 +116,19 @@ def main():
         elif selection == 2:
             if lch.sign_out():
                 print "Sign out successful"
-                # TODO let the user sign back in here
+                signed_back = False
+                while signed_back == False:
+                    sign_back = raw_input("Would you like to sign back in? y/n")
+                    if sign_back == 'y':
+                        if lch.sign_in(user_id, password):
+                            print "Sign in sucessful! "
+                            signed_back = True
+                        else:
+                            print "ERROR: Failed to sign back in."
+                    elif sign_back == 'n':
+                        print "Alright, let me know when you want to sign back in."
+                    else:
+                        print "Please select values offered."
             else:
                 print "Problem signing out, heading to main menu"
                 continue
@@ -128,9 +140,11 @@ def main():
                 continue
             else:
                 print "ERROR: Sign out unsuccessful"
+        else:
+            continue
 
     # Exiting procedure
-
+    exit_client(lch, fwr, listener_thread)
 
 
 def exit_client(lch = None, fwr = None, listener_thread = None):

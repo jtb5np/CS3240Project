@@ -151,6 +151,7 @@ class ServerCommunicationHandler(threading.Thread):
     def change_password(self, username, new_password, client_ip, client_port):
         print "Commencing changing password for user " + username + ", changing password to " + new_password
         if self.check_sign_in(username, client_ip, client_port):
+            print "Server changing password to " + new_password
             return self.account_manager.changePassword(username, new_password)
         else:
             return False

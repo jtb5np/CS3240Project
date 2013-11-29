@@ -50,6 +50,10 @@ class dbManager:
             salt = os.urandom(15)
             hashed_pw = hashlib.sha512(newPassword+salt).hexdigest()
             #insert new updates into db
+
+            print "New passowrd: " + newPassword
+            print "New hashed password: " + hashed_pw
+
             self.c.execute('''UPDATE user set password=?, salt=? WHERE user_name=?''', (hashed_pw,salt,user_name))
             self.conn.commit()
             return True
