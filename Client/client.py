@@ -4,6 +4,7 @@ __author__ = 'xf3da'
 
 import xmlrpclib
 import os
+import EncryptionTest
 from uuid import getnode as get_mac
 
 
@@ -42,9 +43,10 @@ class Client():
         if os.path.isdir(filename):
             return rpc.push_folder(filename, self.server_ip, self.server_port, self.username,
                                    self.ip, self.port, self.mac)
-        with open(filename, "rb") as handle:
-            print filename
-            binary_data = xmlrpclib.Binary(handle.read())
+        with open(filename, "rb") as in_file, open(filename + '.enc', "wb") as out_file:
+            EncryptionTest.encrypt(in_file, out_file, "ThisPassword")
+            binary_data = xmlrpclib.Binary(out_file.read())
+            os.remove(filename + '.enc')
             return rpc.push_file(filename, binary_data, self.server_ip, self.server_port,
                                  self.username, self.ip, self.port, self.mac)
 

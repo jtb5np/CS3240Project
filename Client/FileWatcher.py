@@ -6,6 +6,7 @@ import os
 from Queue import *
 import threading
 import shutil
+import EncryptionTest
 
 
 class FileWatcher(threading.Thread):
@@ -149,8 +150,11 @@ class FileWatcher(threading.Thread):
                 if not os.path.exists(path):
                     os.makedirs(path)
                 try:
-                    with open(f, "wb") as handle:
+                    with open(f + '.enc', "wb") as handle:
                         handle.write(d.data)
+                    with open(f + '.enc', "rb") as in_file, open(f, "wb") as out_file:
+                        EncryptionTest.decrypt(in_file, out_file, "ThisPassword")
+                    os.remove(f + '.enc')
                     if f not in self.files:
                         self.files.append(f)
                     if f not in self.synced_from_server:
