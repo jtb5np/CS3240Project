@@ -79,7 +79,10 @@ class LocalCommunicationHandler(threading.Thread):
 
     def change_password(self, new_password):
         if self.signed_in: # the user can only change password if he/she is signed in
-            return self.client.change_password(new_password)
+            b = self.client.change_password(new_password)
+            if b:
+                self.change_password_file(new_password)
+            return b
         else:
             print "ERROR: The user is not logged in."
             return False
@@ -122,19 +125,6 @@ class LocalCommunicationHandler(threading.Thread):
         #print list_from_server
         for name, filedata in list_from_server:
             self.incoming_file_names.put((name, filedata))
-
-    def change_password(self, pwd):
-        #send password to server, change password
-        #if password is successfully changed, change password in text file and return True
-        #else, return False
-        print 'sent password: ' + pwd
-        if self.client.change_password(pwd):
-            self.change_password_file(pwd)
-            print "Password changed to: " + pwd
-            return True
-        else:
-            print "ERROR: password unchanged."
-            return False
 
     #completed helper method
     def change_password_file(self, password):
@@ -207,7 +197,7 @@ class LocalCommunicationHandler(threading.Thread):
         if self.signed_in:
             try:
                 name = self.file_names.get(True, .1)
-                if self.sync_on: # why the second time?
+                if self.signed_in: # why the second time?
                     self.send_file(name)
                 else:
                     self.file_names.put(name)
@@ -220,7 +210,7 @@ class LocalCommunicationHandler(threading.Thread):
         if self.signed_in:
             try:
                 name = self.deleted_file_names.get(True, .1)
-                if self.sync_on:
+                if self.signed_in:
                     self.send_deleted_file(name)
                 else:
                     self.deleted_file_names.put(name)
