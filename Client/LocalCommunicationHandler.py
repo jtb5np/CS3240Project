@@ -19,7 +19,6 @@ class LocalCommunicationHandler(threading.Thread):
         self.incoming_file_names = iq
         self.incoming_deleted_files = idq
         self.file_sender = threading.Thread(target=self.sync_files)
-        self.sync_on = True
         self.signed_in = False
         self.username = None
         self.client = Client(local_ip, local_port, server_ip, server_port, self.username, root_folder)
@@ -89,6 +88,20 @@ class LocalCommunicationHandler(threading.Thread):
             return b
         else:
             print "ERROR: The user is not logged in."
+            return False
+
+    def share_file(self, file_name, other_user):
+        if self.signed_in:
+            if os.path.isdir(file_name):
+                if self.client.share_file(file_name, other_user):
+                    for f in self.get_files_in(file_name):
+                        self.client.share_file(f, other_user)
+                    return True
+                else:
+                    return False
+            else:
+                return self.client.share_file(file_name, other_user)
+        else:
             return False
 
     def clear_all_local_files(self):
@@ -175,14 +188,12 @@ class LocalCommunicationHandler(threading.Thread):
         self.check_for_new_files()
 
     def check_for_deleted_files(self):
-        #if self.sync_on:
         if self.signed_in:
             list_from_server = self.client.server_deleted_files()
             for name in list_from_server:
                 self.incoming_deleted_files.put(name)
 
     def check_for_new_files(self):
-        #if self.sync_on:
         if self.signed_in:
             list_from_server = self.client.server_new_files()
             #print list_from_server
@@ -198,7 +209,6 @@ class LocalCommunicationHandler(threading.Thread):
 
     def copy_files(self):
         sleep(.2)
-        #if self.sync_on:
         if self.signed_in:
             try:
                 name = self.file_names.get(True, .1)
@@ -211,7 +221,6 @@ class LocalCommunicationHandler(threading.Thread):
                 pass
 
     def delete_files(self):
-        #if self.sync_on:
         if self.signed_in:
             try:
                 name = self.deleted_file_names.get(True, .1)

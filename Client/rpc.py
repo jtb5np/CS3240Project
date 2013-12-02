@@ -62,6 +62,21 @@ def push_folder(folder_name, dest_ip, dest_port, source_username, source_ip, sou
     except socket.error:
         return push_folder(folder_name, dest_ip, dest_port, source_username, source_ip, source_port, mac_addr)
 
+def share_file(other_user, filename, binary, dest_ip, dest_port, source_username, source_ip, source_port):
+    try:
+        rpc_connect = xmlrpclib.ServerProxy("http://%s:%s/"% (dest_ip, dest_port), allow_none = True)
+        return rpc_connect.receive_shared_file(other_user, filename, binary, source_username, source_ip, source_port)
+    except socket.error:
+        return share_file(other_user, filename, binary, dest_ip, dest_port, source_username, source_ip, source_port)
+
+
+def share_folder(other_user, folder_name, dest_ip, dest_port, source_username, source_ip, source_port):
+    try:
+        rpc_connect = xmlrpclib.ServerProxy("http://%s:%s/"% (dest_ip, dest_port), allow_none = True)
+        return rpc_connect.receive_shared_folder(other_user, folder_name, source_username, source_ip, source_port)
+    except socket.error:
+        return share_folder(other_user, folder_name, dest_ip, dest_port, source_username, source_ip, source_port)
+
 
 def server_new_files(dest_ip, dest_port, source_username, source_ip, source_port, mac_addr):
     try:

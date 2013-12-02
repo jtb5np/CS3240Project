@@ -100,13 +100,13 @@ def main():
         exit_client(lch, fwr, listener_thread)
 
 
-    main_menu = "1. Change Password\n2. Sign Out\n3. Sign Out and Exit"
+    main_menu = "1. Change Password\n2. Turn off synchronization\n3. Share files\n4. Sign Out and Exit"
     exit = False
     while not exit:
         print main_menu
-        selection = int(raw_input("Please choose from the memu: "))
+        selection = int(raw_input("Please choose from the menu: "))
         if selection == 1:
-            password = str(raw_input("Input your password: "))
+            password = str(raw_input("Input your new password: "))
             if lch.change_password(password):
                 print "Password changed to: " + password
                 continue
@@ -133,6 +133,14 @@ def main():
                 print "Problem signing out, heading to main menu"
                 continue
         elif selection == 3:
+            other_user = raw_input("Enter name of user with whom you want to share files: ")
+            filename = raw_input("Enter name of file or directory to share: ")
+            if lch.share_file(filename, other_user):
+                print 'File successfully shared.'
+            else:
+                print 'File share unsuccessful.'
+            continue
+        elif selection == 4:
             print "Exiting..."
             if lch.sign_out():
                 print "User signed out"

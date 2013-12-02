@@ -32,6 +32,21 @@ class Client():
     def change_password(self, new_password):
         return rpc.change_password(self.server_ip, self.server_port, self.ip, self.port, self.username, new_password)
 
+    def share_file(self, filename, other_user):
+        if os.path.isdir(filename):
+            return rpc.share_folder(other_user, filename, self.server_ip, self.server_port, self.username,
+                                   self.ip, self.port, self.mac)
+        with open(filename, "rb") as in_file, open(filename + '.enc', "wb") as out_file:
+            EncryptionTest.encrypt(in_file, out_file, "ThisPassword")
+            in_file.close()
+            out_file.close()
+        with open(filename + '.enc', "rb") as handle:
+            binary_data = xmlrpclib.Binary(handle.read())
+            handle.close()
+        os.remove(filename + '.enc')
+        return rpc.share_file(other_user, filename, binary_data, self.server_ip, self.server_port,
+                                 self.username, self.ip, self.port, self.mac)
+
     def sign_out(self):
         return rpc.sign_out(self.server_ip, self.server_port, self.ip, self.port, self.username)
 
