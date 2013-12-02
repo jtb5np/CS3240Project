@@ -1,37 +1,47 @@
-from Tkinter import *
-
-class widgets:
-
-    def __init__(self,root):
-
-        frame = Frame(root)
-        frame.pack()
-        self.textFrame(frame)
-        return
-
-    def textFrame(self,frame):
-
-        log = Frame(frame)
-        self.text = Text(log,height=10,width=50,background='white')
-
-        scroll = Scrollbar(log)
-        self.text.configure(yscrollcommand=scroll.set)
-
-        self.text.pack(side=LEFT)
-        scroll.pack(side=RIGHT,fill=Y)
-        log.pack(side=TOP)
-        return
-
-    def menu(self,frame):
-        menu = Frame(frame,relief = RAISED,borderwidth = 1)
-        menu.pack()
+import Tkinter
+import Pmw
 
 
-    def main(self):
+class Widget:
+    def __init__(self, parent):
 
-        root = Tk()
-        adminInterface = widgets(root)
-        root.title('Admin Interface')
-        root.mainloop()
+        fixedFont = Pmw.logicalfont('Fixed')
+        self.st = Pmw.ScrolledText(parent,
+                                   labelpos = 'n',
+                                   label_text='System Log',
 
-    main()
+                                   usehullsize = 1,
+                                   hull_width = 400,
+                                   hull_height = 300,
+                                   text_wrap='none',
+                                   text_font = fixedFont,
+
+                                   text_padx = 4,
+                                   text_pady = 4,
+                                   )
+
+        self.st.importfile('log.txt');
+        self.st.pack(padx = 5, pady = 5, fill = 'both', expand = 1)
+        self.st.configure(
+            text_state = 'disabled',
+
+            )
+        self.buttonbox = Pmw.ButtonBox(parent,
+                                       labelpos='nw',
+                                       label_text='ButtonBox:')
+
+
+        self.buttonbox.pack(fill='both', padx=8, pady=8)
+
+
+        self.buttonbox.add('System Size')
+        self.buttonbox.add('Users')
+        self.buttonbox.add('Files')
+
+
+if __name__ == '__main__':
+    root = Tkinter.Tk()
+    Pmw.initialise(root)
+    root.title('Admin Gui')
+    widget = Widget(root)
+    root.mainloop()
