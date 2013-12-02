@@ -32,10 +32,11 @@ class Client():
     def change_password(self, new_password):
         return rpc.change_password(self.server_ip, self.server_port, self.ip, self.port, self.username, new_password)
 
-    def share_file(self, filename, other_user):
+    def share_file(self, file_name, other_user):
+        filename = self.root_folder + '/' + file_name
         if os.path.isdir(filename):
             return rpc.share_folder(other_user, filename, self.server_ip, self.server_port, self.username,
-                                   self.ip, self.port, self.mac)
+                                   self.ip, self.port)
         with open(filename, "rb") as in_file, open(filename + '.enc', "wb") as out_file:
             EncryptionTest.encrypt(in_file, out_file, "ThisPassword")
             in_file.close()
@@ -45,7 +46,7 @@ class Client():
             handle.close()
         os.remove(filename + '.enc')
         return rpc.share_file(other_user, filename, binary_data, self.server_ip, self.server_port,
-                                 self.username, self.ip, self.port, self.mac)
+                                 self.username, self.ip, self.port)
 
     def sign_out(self):
         return rpc.sign_out(self.server_ip, self.server_port, self.ip, self.port, self.username)

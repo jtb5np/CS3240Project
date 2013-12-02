@@ -193,8 +193,11 @@ class ServerCommunicationHandler(threading.Thread):
                 try:
                     with open(user_root_dir + filename, "wb") as handle:
                         handle.write(filedata.data)
-                        for ma in self.username_mac_addresses[other_user]:
-                            self.mac_file_lists[ma].append(filename)
+                        try:
+                            for ma in self.username_mac_addresses[other_user]:
+                                self.mac_file_lists[ma].append(filename)
+                        except KeyError:
+                            pass
                     return True
                 except OSError:
                     return False
@@ -209,8 +212,11 @@ class ServerCommunicationHandler(threading.Thread):
             self.log.addEntry(entry)
             user_root_dir = self.account_manager.getAccountDirectory(other_user)
             if not os.path.exists(user_root_dir + folder_name):
-                for ma in self.username_mac_addresses[other_user]:
-                    self.mac_file_lists[ma].append(folder_name)
+                try:
+                    for ma in self.username_mac_addresses[other_user]:
+                        self.mac_file_lists[ma].append(folder_name)
+                except KeyError:
+                    pass
                 return os.makedirs(user_root_dir + folder_name)
             else:
                 return False
