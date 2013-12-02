@@ -1,10 +1,10 @@
+from Client import EncryptionTest
 import rpc
 
 __author__ = 'xf3da'
 
 import xmlrpclib
 import os
-import EncryptionTest
 from uuid import getnode as get_mac
 
 
@@ -50,8 +50,8 @@ class Client():
         with open(filename + '.enc', "rb") as handle:
             binary_data = xmlrpclib.Binary(handle.read())
             handle.close()
-            os.remove(filename + '.enc')
-            return rpc.push_file(filename, binary_data, self.server_ip, self.server_port,
+        os.remove(filename + '.enc')
+        return rpc.push_file(filename, binary_data, self.server_ip, self.server_port,
                                  self.username, self.ip, self.port, self.mac)
 
     def create_new_account(self, uid, pwd):
