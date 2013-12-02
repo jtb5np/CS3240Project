@@ -3,7 +3,7 @@ __author__ = 'Mark Fang'
 import socket
 
 import ServerCommunicationHandler
-from Server.pwdb import *
+from ServerCommunicationHandler.pwdb import *
 
 
 def get_local_ip():
