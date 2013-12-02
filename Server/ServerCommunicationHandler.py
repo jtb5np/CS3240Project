@@ -4,10 +4,10 @@ import threading
 from SimpleXMLRPCServer import SimpleXMLRPCServer
 import xmlrpclib
 import shutil
-
-from Server.pwdb import *
+from pwdb import *
 import Log
 import LogEntry
+import os.path
 
 
 class ClientData():
@@ -49,11 +49,18 @@ class ServerCommunicationHandler(threading.Thread):
                 self.mac_file_lists[mac_addr] = []
             if mac_addr not in self.mac_deleted_file_lists.keys():
                 self.mac_deleted_file_lists[mac_addr] = []
+
         entry = LogEntry.LogEntry(username, "Created an account")
         self.log.addEntry(entry)
-        print "create_new_account before account_manager"
         self.account_manager.createAccount(username, password, "")
+        try:
+            os.makedirs(self.account_manager.getAccountDirectory(username) + "onedir")
+        except OSError:
+            pass
         return True
+
+    def delte_account(self, username):
+        return self.account_manager.deleteAccount(username)
 
     def get_files_in(self, some_path_name):
         temp_list = self.list_dir_ignore_backups(some_path_name)
@@ -84,8 +91,12 @@ class ServerCommunicationHandler(threading.Thread):
             entry = LogEntry.LogEntry("Server", "Sent All Files: " + " to " + username )
             self.log.addEntry(entry)
             ret_list = [self.get_most_recent_timestamp(username)]
-            for filename in self.get_files_in(self.account_manager.getAccountDirectory(username)):
-                f_stripped = filename.replace(self.account_manager.getAccountDirectory(username) + '/', '')
+
+            print "Directory: " + self.account_manager.getAccountDirectory(username)
+
+
+            for filename in self.get_files_in(self.account_manager.getAccountDirectory(username) + "onedir"):
+                f_stripped = filename.replace(self.account_manager.getAccountDirectory(username), '')
                 print f_stripped
                 if os.path.isdir(filename):
                     ret_list.append((f_stripped, None))

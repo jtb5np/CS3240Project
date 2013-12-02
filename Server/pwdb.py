@@ -13,7 +13,6 @@ class dbManager:
             self.c = self.conn.cursor()
             self.c.execute('''CREATE TABLE user (user_name TEXT PRIMARY KEY, password TEXT, salt TEXT, directory_name TEXT, serverId INTEGER)''')
 
-
     #creating Account:
     def createAccount(self, user_name, password, directory_name):
         #need to check if account details do not already exist
@@ -32,8 +31,7 @@ class dbManager:
             self.conn.commit()
             #create user directory on server
             newPath = self.rootPath+`self.serverDirectoryId`
-            if not os.path.exists(newPath):
-                os.makedirs(newPath)
+            if not os.path.exists(newPath): os.makedirs(newPath)
             #increment server id
             self.serverDirectoryId += 1
             return True
@@ -50,10 +48,6 @@ class dbManager:
             salt = os.urandom(15)
             hashed_pw = hashlib.sha512(newPassword+salt).hexdigest()
             #insert new updates into db
-
-            print "New passowrd: " + newPassword
-            print "New hashed password: " + hashed_pw
-
             self.c.execute('''UPDATE user set password=?, salt=? WHERE user_name=?''', (hashed_pw,salt,user_name))
             self.conn.commit()
             return True
@@ -74,11 +68,6 @@ class dbManager:
             userSalt = result[1]
             #encrypt given password and compare
             hashed_GivenPw = hashlib.sha512(password+userSalt).hexdigest()
-
-            print hashed_GivenPw
-            print userHash
-
-
             if(userHash == hashed_GivenPw):
                 #sucess
                 return True
@@ -93,8 +82,8 @@ class dbManager:
         attemptedUser = self.c.fetchall()
         if len(attemptedUser) == 1:
             result = attemptedUser[0]
-            account_directory = str(result[0])
-            return self.rootPath+account_directory + '/'
+            account_directory = result[0]
+            return self.rootPath+str(account_directory) + '/'
         return "No such user"
 
     #return the local file directory of the user- useful for getting file locations within the oneDire folder and ignoring those outside
@@ -103,6 +92,18 @@ class dbManager:
         self.conn.text_factory = str
         self.c = self.conn.cursor()
         self.c.execute('''SELECT directory_name FROM user WHERE user_name=?''', (user_name,))
+        attemptedUser = self.c.fetchall()
+        if len(attemptedUser) == 1:
+            result = attemptedUser[0]
+            return result[0]
+        return "No such user"
+
+    #get user salt for file encryption
+    def getSalt(self, user_name):
+        self.conn = sqlite3.connect(self.rootPath+'passwords.db')
+        self.conn.text_factory = str
+        self.c = self.conn.cursor()
+        self.c.execute('''SELECT salt FROM user WHERE user_name=?''', (user_name,))
         attemptedUser = self.c.fetchall()
         if len(attemptedUser) == 1:
             result = attemptedUser[0]
@@ -128,6 +129,29 @@ class dbManager:
                 fp = os.path.join(dirpath, f)
                 total_size += os.path.getsize(fp)
         return total_size
+
+    #removing user account
+    def deleteAccount(self, user_name):
+        self.conn = sqlite3.connect(self.rootPath+'passwords.db')
+        self.conn.text_factory = str
+        self.c = self.conn.cursor()
+        self.c.execute('''SELECT serverId FROM user WHERE user_name=?''',(user_name,))
+        user = self.c.fetchall()
+        #Check to make sure user_name was valid
+        if len(user == 1):
+            self.c.execute('''DELETE FROM user WHERE user_name=?''',(user_name,))
+            self.conn.commit()
+            return True
+        #no such user
+        return False
+
+    #finding a list of all users
+    def getUserList(self):
+        self.conn = sqlite3.connect(self.rootPath+'passwords.db')
+        self.conn.text_factory = str
+        self.c = self.conn.cursor()
+        self.c.execute('''SELECT user_name FROM user''')
+        return self.c.fetchall()
 
     #finding total file number per user
     def adminFindFileNum(self, user_name):

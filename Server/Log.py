@@ -27,7 +27,8 @@ class Log:
                 x.printLogEntry()
 
     def update_log_file(self,entry):
-        self.log_file.write(str(entry.printLogEntry()))
+        with open("log.txt", "a") as myFile:
+            myFile.write(str(entry.printLogEntry()))
 
     def get_actor_activity(self,actor):
 
