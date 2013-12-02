@@ -6,7 +6,7 @@ from time import sleep
 import os
 import shutil
 
-from Client.client import Client
+from client import Client
 
 
 class LocalCommunicationHandler(threading.Thread):
@@ -60,15 +60,19 @@ class LocalCommunicationHandler(threading.Thread):
         #if sign in successful, return True; otherwise, return False
         self.signed_in = self.client.login(uid, pwd)
         if self.signed_in:
-            if not os.path.exists('Client/account_info.txt'):
+            if not os.path.exists('account_info.txt'):
                 # if sign in for the first time
                 try:
-                    f = open('Client/account_info.txt', 'w+')
+                    f = open('account_info.txt', 'w+')
                     f.write(uid + '\n' + pwd)
                     f.close()
                 except OSError:
                     return False
             self.username = uid
+            while not self.file_names.empty():
+                self.copy_files()
+            while not self.deleted_file_names.empty():
+                self.delete_files()
             self.clear_all_local_files()
             self.get_all_server_files()
             print 'Sign in successful'
@@ -90,10 +94,11 @@ class LocalCommunicationHandler(threading.Thread):
     def clear_all_local_files(self):
         for f in self.get_files_in(self.root):
             try:
-                if os.path.isdir(f):
-                    shutil.rmtree(f)
-                else:
-                    os.remove(f)
+                if not f == self.root:
+                    if os.path.isdir(f):
+                        shutil.rmtree(f)
+                    else:
+                        os.remove(f)
             except OSError:
                 pass
 
@@ -128,11 +133,11 @@ class LocalCommunicationHandler(threading.Thread):
 
     #completed helper method
     def change_password_file(self, password):
-        f = open('Client/account_info.txt', 'r')
+        f = open('account_info.txt', 'r')
         id = f.readline()
         f.close()
-        os.remove('Client/account_info.txt')
-        f2 = open('Client/account_info.txt', 'w+')
+        os.remove('account_info.txt')
+        f2 = open('account_info.txt', 'w+')
         f2.write(id)
         f2.write(password)
         f2.close()
@@ -192,7 +197,7 @@ class LocalCommunicationHandler(threading.Thread):
             self.listen()
 
     def copy_files(self):
-        sleep(1)
+        sleep(.2)
         #if self.sync_on:
         if self.signed_in:
             try:
@@ -201,7 +206,7 @@ class LocalCommunicationHandler(threading.Thread):
                     self.send_file(name)
                 else:
                     self.file_names.put(name)
-                    self.file_names.task_done()
+                self.file_names.task_done()
             except Empty:
                 pass
 
@@ -211,7 +216,8 @@ class LocalCommunicationHandler(threading.Thread):
             try:
                 name = self.deleted_file_names.get(True, .1)
                 if self.signed_in:
-                    self.send_deleted_file(name)
+                    if not os.path.exists(name):
+                        self.send_deleted_file(name)
                 else:
                     self.deleted_file_names.put(name)
                 self.deleted_file_names.task_done()

@@ -1,4 +1,4 @@
-from Client import LocalCommunicationHandler, FileWatcher
+import LocalCommunicationHandler, FileWatcher
 
 __author__ = 'Jacob'
 
@@ -37,9 +37,9 @@ def listen_for_connection(ch):
 
 def main():
     answer = ''
-    if os.path.exists('Client/account_info.txt'):
+    if os.path.exists('account_info.txt'):
         answer = '2'
-        info_file = open('Client/account_info.txt', 'r')
+        info_file = open('account_info.txt', 'r')
         user_id = info_file.readline().rstrip('\n')
         password = info_file.readline().rstrip('\n')
         #root_folder = info_file.readline().rstrip('\n')
@@ -65,9 +65,9 @@ def main():
     local_port = 9000
 
     #test script
-    # server_ip = raw_input('Enter server IP address: ') TODO temporary disabled
-    server_ip = "192.168.146.15"
-    server_port = 8000
+    server_ip = raw_input('Enter server IP address: ')
+    #server_ip = "192.168.146.15"
+    server_port = 8001
     local_ip = get_local_ip()
 
     lch = LocalCommunicationHandler.LocalCommunicationHandler(server_ip, server_port, local_ip, local_port, root_folder, files_to_send, files_to_delete, files_to_receive, deleted_files_to_receive)
@@ -104,7 +104,7 @@ def main():
     exit = False
     while not exit:
         print main_menu
-        selection = int(raw_input("Plesae choose from the memu: "))
+        selection = int(raw_input("Please choose from the memu: "))
         if selection == 1:
             password = str(raw_input("Input your password: "))
             if lch.change_password(password):

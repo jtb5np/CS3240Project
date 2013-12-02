@@ -74,7 +74,7 @@ class FileWatcher(threading.Thread):
         for f in the_list:
             temp_list.append(f)
         for f in temp_list:
-            if f.endswith('~') or f.startswith('.'):
+            if f.endswith('~') or f.startswith('.') or f.endswith('.enc'):
                 the_list.remove(f)
         return the_list
 
@@ -142,7 +142,7 @@ class FileWatcher(threading.Thread):
                 except OSError:
                     pass
                 if f not in self.files:
-                        self.files.append(f)
+                    self.files.append(f)
                 if f not in self.synced_from_server:
                     self.synced_from_server.append(f)
             else:
@@ -152,8 +152,11 @@ class FileWatcher(threading.Thread):
                 try:
                     with open(f + '.enc', "wb") as handle:
                         handle.write(d.data)
+                        handle.close()
                     with open(f + '.enc', "rb") as in_file, open(f, "wb") as out_file:
                         EncryptionTest.decrypt(in_file, out_file, "ThisPassword")
+                        in_file.close()
+                        out_file.close()
                     os.remove(f + '.enc')
                     if f not in self.files:
                         self.files.append(f)

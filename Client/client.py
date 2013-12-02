@@ -1,4 +1,4 @@
-from Client import rpc
+import rpc
 
 __author__ = 'xf3da'
 
@@ -45,7 +45,11 @@ class Client():
                                    self.ip, self.port, self.mac)
         with open(filename, "rb") as in_file, open(filename + '.enc', "wb") as out_file:
             EncryptionTest.encrypt(in_file, out_file, "ThisPassword")
-            binary_data = xmlrpclib.Binary(out_file.read())
+            in_file.close()
+            out_file.close()
+        with open(filename + '.enc', "rb") as handle:
+            binary_data = xmlrpclib.Binary(handle.read())
+            handle.close()
             os.remove(filename + '.enc')
             return rpc.push_file(filename, binary_data, self.server_ip, self.server_port,
                                  self.username, self.ip, self.port, self.mac)
