@@ -22,13 +22,10 @@ class Widget:
 
         self.st.importfile('log.txt');
         self.st.pack(padx = 5, pady = 5, fill = 'both', expand = 1)
-        self.st.configure(
-            text_state = 'disabled',
 
-            )
         self.buttonbox = Pmw.ButtonBox(parent,
                                        labelpos='nw',
-                                       label_text='ButtonBox:')
+                                       label_text='Admin Commands:')
 
 
         self.buttonbox.pack(fill='both', padx=8, pady=8)
@@ -38,10 +35,21 @@ class Widget:
         self.buttonbox.add('Users')
         self.buttonbox.add('Files')
 
+    def update(self):
+
+        self.st.importfile('log.txt')
+        root.after(1000, self.update)
+
+    def clear(self):
+
+        self.st.clear()
+        root.after(999, self.clear)
 
 if __name__ == '__main__':
     root = Tkinter.Tk()
     Pmw.initialise(root)
     root.title('Admin Gui')
     widget = Widget(root)
+    root.after(1000,widget.clear)
+    root.after(1000,widget.update)
     root.mainloop()
