@@ -1,0 +1,39 @@
+from Tkinter import*
+
+class widgets:
+
+    def __init__(self,root):
+
+        frame = Frame(root)
+        frame.pack()
+        self.textFrame(frame)
+        return
+
+    def textFrame(self,frame):
+
+        log = Frame(frame)
+        self.text = Text(log,height=10,width=50,background='white')
+
+        scroll = Scrollbar(log)
+        self.text.configure(yscrollcommand=scroll.set)
+
+        self.text.pack(side=LEFT)
+        scroll.pack(side=RIGHT,fill=Y)
+        log.pack(side=TOP)
+        return
+
+    def menu(self,frame):
+        menu = Frame(frame,relief = RAISED,borderwidth = 1)
+        menu.pack()
+
+
+
+
+    def main(self):
+
+        root = Tk()
+        adminInterface = widgets(root)
+        root.title('Admin Interface')
+        root.mainloop()
+
+    main()

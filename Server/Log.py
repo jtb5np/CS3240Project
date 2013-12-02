@@ -8,7 +8,7 @@ class Log:
 
     def __init__(self, history = []):
         self.log = history
-        self.log_file = open("log.txt", "w")
+        self.log_file = open("log.txt", "a")
 
     def addEntry(self, entry):
 
