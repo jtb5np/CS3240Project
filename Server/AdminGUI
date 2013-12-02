@@ -1,12 +1,14 @@
+from Tkconstants import RIGHT
 import Tkinter
 import Pmw
+import ServerCommunicationHandler
 
 
 class Widget:
     def __init__(self, parent):
 
         fixedFont = Pmw.logicalfont('Fixed')
-        self.st = Pmw.ScrolledText(parent,
+        self.logText = Pmw.ScrolledText(parent,
                                    labelpos = 'n',
                                    label_text='System Log',
 
@@ -20,8 +22,11 @@ class Widget:
                                    text_pady = 4,
                                    )
 
-        self.st.importfile('log.txt');
-        self.st.pack(padx = 5, pady = 5, fill = 'both', expand = 1)
+        self.logText.importfile('log.txt');
+        self.logText.pack(padx = 5, pady = 5, fill = 'both', expand = 1)
+
+
+
 
         self.buttonbox = Pmw.ButtonBox(parent,
                                        labelpos='nw',
@@ -31,21 +36,38 @@ class Widget:
         self.buttonbox.pack(fill='both', padx=8, pady=8)
 
 
-        self.buttonbox.add('System Information', command=self.getSystemInfo)
+        self.buttonbox.add('System Information')
         self.buttonbox.add('User Information')
 
-    def getSystemInfo(self):
+        self.entryLabel = Tkinter.Label(text='Enter username').pack(side= RIGHT, padx=10,pady=10)
+        self.entry = Tkinter.Entry(root, width=10).pack(side = RIGHT,padx=10)
 
+        self.queryText = Pmw.ScrolledText(parent,
+                                   labelpos = 'n',
+                                   label_text='System Log',
+
+                                   usehullsize = 1,
+                                   hull_width = 400,
+                                   hull_height = 300,
+                                   text_wrap='none',
+                                   text_font = fixedFont,
+
+                                   text_padx = 4,
+                                   text_pady = 4,
+                                   )
+
+        self.queryText.importfile('log.txt')
+        self.queryText.pack(padx = 5, pady = 5, fill = 'both', expand = 1)
 
 
     def update(self):
 
-        self.st.importfile('log.txt')
+        self.logText.importfile('log.txt')
         root.after(1000, self.update)
 
     def clear(self):
 
-        self.st.clear()
+        self.logText.clear()
         root.after(999, self.clear)
 
 if __name__ == '__main__':
