@@ -59,8 +59,19 @@ class ServerCommunicationHandler(threading.Thread):
             pass
         return True
 
+    def display_users(self):
+        try:
+            return self.account_manager.getUserList()
+        except OSError:
+            return None
+            pass
+
     def delete_account(self, username):
-        return self.account_manager.deleteAccount(username)
+        try:
+            return self.account_manager.deleteAccount(username)
+        except OSError:
+            return None
+            pass
 
     def get_files_in(self, some_path_name):
         temp_list = self.list_dir_ignore_backups(some_path_name)
@@ -181,6 +192,48 @@ class ServerCommunicationHandler(threading.Thread):
             # if no, return prompt to register
             return False
 
+    def receive_shared_file(self, other_user, filename, filedata, username, source_ip, source_port):
+        if self.check_sign_in(username, source_ip, source_port):
+            entry = LogEntry.LogEntry("Server", "User " + username + " shared " + filename + " with " + other_user)
+            self.log.addEntry(entry)
+            path, name = os.path.split(filename)
+            user_root_dir = self.account_manager.getAccountDirectory(other_user)
+            if not user_root_dir == "No such user":
+                if not os.path.exists(user_root_dir + path):
+                    os.makedirs(user_root_dir + path)
+                try:
+                    with open(user_root_dir + filename, "wb") as handle:
+                        handle.write(filedata.data)
+                        try:
+                            for ma in self.username_mac_addresses[other_user]:
+                                self.mac_file_lists[ma].append(filename)
+                        except KeyError:
+                            pass
+                    return True
+                except OSError:
+                    return False
+            else:
+                return False
+        else:
+            return False
+
+    def receive_shared_folder(self, other_user, folder_name, username, source_ip, source_port):
+        if self.check_sign_in(username, source_ip, source_port): #if the client (IP and Port) has signed in
+            entry = LogEntry.LogEntry("Server", "User " + username + " shared " + folder_name + " with " + other_user)
+            self.log.addEntry(entry)
+            user_root_dir = self.account_manager.getAccountDirectory(other_user)
+            if not os.path.exists(user_root_dir + folder_name):
+                try:
+                    for ma in self.username_mac_addresses[other_user]:
+                        self.mac_file_lists[ma].append(folder_name)
+                except KeyError:
+                    pass
+                return os.makedirs(user_root_dir + folder_name)
+            else:
+                return False
+        else:
+            return False
+
     def receive_file(self, filename, filedata, username, source_ip, source_port, mac_addr):
         if self.check_sign_in(username, source_ip, source_port): #if the client (IP and Port) has signed in
             entry = LogEntry.LogEntry("Server", "Received File: " + filename + " from " + username )
@@ -216,8 +269,10 @@ class ServerCommunicationHandler(threading.Thread):
                         if not ma == mac_addr:
                             self.mac_file_lists[ma].append(folder_name)
                 return os.makedirs(user_root_dir + folder_name)
-            else: return False
-        else: return False
+            else:
+                return False
+        else:
+            return False
 
     def send_files(self, username, client_ip, client_port, client_mac):
         #send a file to be copied to the local  machine
