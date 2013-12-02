@@ -1,4 +1,4 @@
-from Client import EncryptionTest
+import EncryptionTest
 import rpc
 
 __author__ = 'xf3da'
