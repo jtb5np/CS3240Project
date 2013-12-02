@@ -228,7 +228,8 @@ class ServerCommunicationHandler(threading.Thread):
                         self.mac_file_lists[ma].append(folder_name)
                 except KeyError:
                     pass
-                return os.makedirs(user_root_dir + folder_name)
+                os.makedirs(user_root_dir + folder_name)
+                return True
             else:
                 return False
         else:
@@ -280,11 +281,14 @@ class ServerCommunicationHandler(threading.Thread):
         if self.check_sign_in(username, client_ip, client_port): # if signed in
             ret_list = []
             for filename in self.mac_file_lists[client_mac]:
-                entry = LogEntry.LogEntry("Server", "Sent File: " + filename + " to " + username )
-                self.log.addEntry(entry)
+                #entry = LogEntry.LogEntry("Server", "Sent File: " + filename + " to " + username )
+                #self.log.addEntry(entry)
                 if os.path.isdir(self.account_manager.getAccountDirectory(username) + filename):
                     ret_list.append((filename, None))
-                    entry = LogEntry.LogEntry("Server", "Sent File: " + filename + " to " + username )
+
+                    print "SENDING: " + filename
+
+                    entry = LogEntry.LogEntry("HERE Server", "Sent File: " + filename + " to " + username )
                     self.log.addEntry(entry)
                 else:
                     with open(self.account_manager.getAccountDirectory(username) + filename, "rb") as handle:
@@ -330,7 +334,7 @@ class ServerCommunicationHandler(threading.Thread):
         self.log.log.print_log()
 
     def start_server(self):
-        self.server = SimpleXMLRPCServer((self.ip, self.port), allow_none =True)
+        self.server = SimpleXMLRPCServer((self.ip, self.port), allow_none =True, logRequests=False)
         self.server.register_instance(self)
         self.server.register_introspection_functions()
         server_wait = threading.Thread(target=self.server.serve_forever)
