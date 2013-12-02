@@ -31,9 +31,12 @@ class Widget:
         self.buttonbox.pack(fill='both', padx=8, pady=8)
 
 
-        self.buttonbox.add('System Size')
-        self.buttonbox.add('Users')
-        self.buttonbox.add('Files')
+        self.buttonbox.add('System Information', command=self.getSystemInfo)
+        self.buttonbox.add('User Information')
+
+    def getSystemInfo(self):
+
+
 
     def update(self):
 
