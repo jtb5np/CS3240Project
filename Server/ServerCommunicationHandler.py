@@ -59,7 +59,7 @@ class ServerCommunicationHandler(threading.Thread):
             pass
         return True
 
-    def delte_account(self, username):
+    def delete_account(self, username):
         return self.account_manager.deleteAccount(username)
 
     def get_files_in(self, some_path_name):
