@@ -59,8 +59,19 @@ class ServerCommunicationHandler(threading.Thread):
             pass
         return True
 
+    def display_users(self):
+        try:
+            return self.account_manager.getUserList()
+        except OSError:
+            return None
+            pass
+
     def delete_account(self, username):
-        return self.account_manager.deleteAccount(username)
+        try:
+            return self.account_manager.deleteAccount(username)
+        except OSError:
+            return None
+            pass
 
     def get_files_in(self, some_path_name):
         temp_list = self.list_dir_ignore_backups(some_path_name)
