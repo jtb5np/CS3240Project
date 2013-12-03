@@ -136,7 +136,7 @@ class FileWatcher(threading.Thread):
     def modify_local_file(self):
         try:
             f, d = self.incoming_file_names.get(True, .1)
-            if d == None:
+            if d is None:
                 try:
                     os.makedirs(f)
                 except OSError:
@@ -149,6 +149,10 @@ class FileWatcher(threading.Thread):
                 path, name = os.path.split(f)
                 if not os.path.exists(path):
                     os.makedirs(path)
+                    if path not in self.files:
+                        self.files.append(path)
+                    if path not in self.synced_from_server:
+                        self.synced_from_server.append(path)
                 try:
                     with open(f + '.enc', "wb") as handle:
                         handle.write(d.data)
