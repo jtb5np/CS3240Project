@@ -66,14 +66,13 @@ def main():
 
     #test script
     server_ip = raw_input('Enter server IP address: ')
-    #server_ip = "192.168.146.15"
-    server_port = 8001
+    server_port = 8000
     local_ip = get_local_ip()
 
     lch = LocalCommunicationHandler.LocalCommunicationHandler(server_ip, server_port, local_ip, local_port, root_folder, files_to_send, files_to_delete, files_to_receive, deleted_files_to_receive)
     listener_thread = threading.Thread(target=listen_for_connection, args=(lch,))
 
-
+    fwr.start()
     signed_in = False
     if answer == '1':
         if lch.create_new_account(user_id, password):
@@ -92,7 +91,6 @@ def main():
             print "ERROR: Sign in unsuccessful"
 
     if signed_in:
-        fwr.start()
         lch.start()
         listener_thread.start()
     else:

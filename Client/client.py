@@ -32,8 +32,7 @@ class Client():
     def change_password(self, new_password):
         return rpc.change_password(self.server_ip, self.server_port, self.ip, self.port, self.username, new_password)
 
-    def share_file(self, file_name, other_user):
-        filename = self.root_folder + '/' + file_name
+    def share_file(self, filename, other_user):
         if os.path.isdir(filename):
             return rpc.share_folder(other_user, filename, self.server_ip, self.server_port, self.username,
                                    self.ip, self.port)

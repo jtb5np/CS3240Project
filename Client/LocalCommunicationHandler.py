@@ -92,27 +92,22 @@ class LocalCommunicationHandler(threading.Thread):
 
     def share_file(self, file_name, other_user):
         if self.signed_in:
-            if os.path.isdir(file_name):
-                if self.client.share_file(file_name, other_user):
-                    for f in self.get_files_in(file_name):
-                        self.client.share_file(f, other_user)
-                    return True
-                else:
-                    return False
+            full_file_name = self.root + '/' + file_name
+            if os.path.isdir(full_file_name):
+                b = True
+                for f in self.get_files_in(full_file_name):
+                    if not self.client.share_file(f, other_user):
+                        b = False
+                return b
             else:
-                return self.client.share_file(file_name, other_user)
+                return self.client.share_file(full_file_name, other_user)
         else:
             return False
 
     def clear_all_local_files(self):
         for f in self.get_files_in(self.root):
-            try:
-                if not f == self.root:
-                    if os.path.isdir(f):
-                        shutil.rmtree(f)
-                    else:
-                        os.remove(f)
-            except OSError:
+            self.incoming_deleted_files.put(f)
+            while not self.incoming_deleted_files.empty():
                 pass
 
     def get_files_in(self, some_path_name):
