@@ -21,6 +21,7 @@ class ClientData():
         else:
             return False
 
+
 class ServerCommunicationHandler(threading.Thread):
 
     def __init__(self, ip, port, account_manager):
@@ -68,10 +69,23 @@ class ServerCommunicationHandler(threading.Thread):
 
     def delete_account(self, username):
         try:
-            return self.account_manager.deleteAccount(username)
+            if self.account_manager.deleteAccount(username):
+                if username in self.username_mac_addresses.keys():
+                    for mac in self.username_mac_addresses[username]:
+                        del self.mac_file_lists[mac]
+                        del self.mac_deleted_file_lists[mac]
+                    del self.username_mac_addresses[username]
         except OSError:
-            return None
+            return False
             pass
+
+    def remove_account_directory(self, username):
+        try:
+            path = self.account_manager.getAccountDirectory(username)
+            os.rmdir(path)
+            return True
+        except:
+            return False
 
     def get_files_in(self, some_path_name):
         temp_list = self.list_dir_ignore_backups(some_path_name)
@@ -170,13 +184,17 @@ class ServerCommunicationHandler(threading.Thread):
         else: # not signed in
             return False
 
-    def change_password(self, username, new_password, client_ip, client_port):
+    def change_password(self, username, new_password, client_ip, client_port, admin = False):
         print "Commencing changing password for user " + username + ", changing password to " + new_password
-        if self.check_sign_in(username, client_ip, client_port):
-            print "Server changing password to " + new_password
+        if admin:
+            print "Admin User changing password"
             return self.account_manager.changePassword(username, new_password)
         else:
-            return False
+            if self.check_sign_in(username, client_ip, client_port):
+                print "Server changing password to " + new_password
+                return self.account_manager.changePassword(username, new_password)
+            else:
+                return False
 
     def check_sign_in(self, username, source_ip, source_port):
         # returns true if client IP and port has already signed in
@@ -317,11 +335,15 @@ class ServerCommunicationHandler(threading.Thread):
         else:
             return []
 
-    def get_user_information(self,user_name):
-        size_files = self.account_manager.adminFindFileSize(user_name)
-        num_files = self.account_manager.adminFindFileNum(user_name)
-        account_dir = self.account_manager.getAccountDirectory(user_name)
-        print "User: " + user_name + " has " + num_files + " files totaling " + size_files + " bits in " + account_dir
+    def get_user_information(self,user_name): # TODO not working - 2 methods in account_manager not working properly
+        try:
+            account_dir = self.account_manager.getAccountDirectory(user_name)
+            num_files = self.account_manager.adminFindFileNum(user_name)
+            size_files = self.account_manager.adminFindFileSize(user_name)
+            print "User: " + user_name + " has " + num_files + " files totaling " + size_files + " bits in " + account_dir
+            return True
+        except:
+            return False
 
     def get_system_information(self):
         size_files = self.account_manager.get_size(self.server.base_folder)
@@ -330,7 +352,7 @@ class ServerCommunicationHandler(threading.Thread):
 
         print "System has " + num_files + " files totaling " + size_files + " bits between " + num_users + " users"
 
-    def print_log(self):
+    def print_log(self): # TODO: PROBLEM HERE. When I first started the server and then call this method it says "'list' object has no attribute 'print_log'"
         self.log.log.print_log()
 
     def start_server(self):
