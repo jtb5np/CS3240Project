@@ -3,13 +3,11 @@ import LocalCommunicationHandler, FileWatcher
 __author__ = 'Jacob'
 
 from Queue import Queue
+import LocalGui
 import threading
-import multiprocessing
-import multiprocessing.connection
 import os
 import sys
 import socket
-
 
 def main():
     answer = ''
@@ -70,60 +68,12 @@ def main():
         print "Exiting..."
         exit_client(lch, fwr)
 
-
-    main_menu = "1. Change Password\n2. Turn off synchronization\n3. Share files\n4. Sign Out and Exit"
-    exit = False
-    while not exit:
-        print main_menu
-        try:
-            selection = int(raw_input("Please choose from the menu: "))
-        except ValueError:
-            continue
-        if selection == 1:
-            password = str(raw_input("Input your new password: "))
-            if lch.change_password(password):
-                print "Password changed to: " + password
-                continue
-            else:
-                print "ERROR: password unchanged. Please make sure that you are logged in"
-                continue
-        elif selection == 2:
-            if lch.sign_out():
-                print "Sign out successful"
-                signed_back = False
-                while not signed_back:
-                    sign_back = raw_input("Would you like to sign back in? y/n")
-                    if sign_back == 'y':
-                        if lch.sign_in(user_id, password):
-                            print "Sign in sucessful! "
-                            signed_back = True
-                        else:
-                            print "ERROR: Failed to sign back in."
-                    elif sign_back == 'n':
-                        print "Alright, let me know when you want to sign back in."
-                    else:
-                        print "Please select values offered."
-            else:
-                print "Problem signing out, heading to main menu"
-                continue
-        elif selection == 3:
-            other_user = raw_input("Enter name of user with whom you want to share files: ")
-            filename = raw_input("Enter name of file or directory to share: ")
-            if lch.share_file(filename, other_user):
-                print 'File successfully shared.'
-            else:
-                print 'File share unsuccessful.'
-            continue
-        elif selection == 4:
-            print "Exiting..."
-            if lch.sign_out():
-                print "User signed out"
-                exit = True
-                continue
-            else:
-                print "ERROR: Sign out unsuccessful"
-        else:
-            continue
+    while True:
+        g = LocalGui.LocalGui(lch, fwr, user_id, password)
+        if not g.on:
+            s = raw_input('Enter any text to reopen GUI.')
+            while s == '':
+                s = raw_input('Enter any text to reopen GUI.')
 
     # Exiting procedure
     exit_client(lch, fwr)
@@ -144,6 +94,7 @@ def get_local_ip():
     current_local_ip = s.getsockname()[0]
     s.close()
     return current_local_ip
+
 
 if __name__ == '__main__':
     main()
