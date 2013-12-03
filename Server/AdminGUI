@@ -1,10 +1,10 @@
 from Tkconstants import RIGHT
 import Tkinter
 import Pmw
-import ServerCommunicationHandler
+import tkSimpleDialog
 
 
-class Widget:
+class Widget():
     def __init__(self, parent):
 
         fixedFont = Pmw.logicalfont('Fixed')
@@ -36,15 +36,19 @@ class Widget:
         self.buttonbox.pack(fill='both', padx=8, pady=8)
 
 
-        self.buttonbox.add('System Information')
-        self.buttonbox.add('User Information')
+        self.buttonbox.add('System Information', command= self.get_system_info())
+        self.buttonbox.add('User Information', command = self.get_user_info())
+        self.buttonbox.add('Change Password', command= self.change_password())
+        self.buttonbox.add('Remove User', command= self.remove_user())
+        self.buttonbox.add('List Users', command= self.list_users())
 
-        self.entryLabel = Tkinter.Label(text='Enter username').pack(side= RIGHT, padx=10,pady=10)
-        self.entry = Tkinter.Entry(root, width=10).pack(side = RIGHT,padx=10)
+
+        with open("query.txt", "w") as myFile:
+            myFile.write('')
 
         self.queryText = Pmw.ScrolledText(parent,
                                    labelpos = 'n',
-                                   label_text='System Log',
+                                   label_text='Query Response',
 
                                    usehullsize = 1,
                                    hull_width = 400,
@@ -56,25 +60,91 @@ class Widget:
                                    text_pady = 4,
                                    )
 
-        self.queryText.importfile('log.txt')
+        self.queryText.importfile('query.txt')
         self.queryText.pack(padx = 5, pady = 5, fill = 'both', expand = 1)
 
+    def get_system_info(self):
+        sys_info = get_system_information()
+        with open("query.txt", "w") as myFile:
+            myFile.write(sys_info)
 
-    def update(self):
+    def get_user_info(self):
+        username = self.entry.get()
+        user_info = get_user_information(username)
+        with open("query.txt", "w") as myFile:
+            myFile.write(user_info)
+
+
+    def change_password(self):
+
+        dialog = pass_change_dialog()
+        dialog.body()
+        dialog.apply()
+
+    def remove_user(self):
+
+        dialog = remove_user_dialog()
+        dialog.body()
+        dialog.apply()
+
+    def list_users(self):
+
+        user_list = display_users()
+
+        with open("query.txt", "w") as myFile:
+            myFile.write(user_list)
+
+    def update_log(self):
 
         self.logText.importfile('log.txt')
-        root.after(1000, self.update)
+        root.after(1000, self.update_log)
 
-    def clear(self):
+    def clear_log(self):
 
         self.logText.clear()
-        root.after(999, self.clear)
+        root.after(999, self.clear_log)
+
+class pass_change_dialog(tkSimpleDialog.Dialog):
+
+    def body(self, master):
+
+        self.user_label = Tkinter.Label(master, text="Username:").grid(row=0)
+        self.pass_label = Tkinter.Label(master, text="Password:").grid(row=1)
+
+        self.user_entry = Tkinter.Entry(master)
+        self.pass_entry = Tkinter.Entry(master)
+
+        self.user_entry.grid(row=0, column=1)
+        self.pass_entry.grid(row=1, column=1)
+        return self.user_entry
+
+    def apply(self):
+        username = (self.user_entry.get())
+        password = (self.pass_entry.get())
+
+        change_password(username,password,)
+
+class remove_user_dialog(tkSimpleDialog.Dialog):
+
+    def body(self, master):
+
+        self.user_label = Tkinter.Label(master, text="Username:").grid(row=0)
+
+        self.user_entry = Tkinter.Entry(master)
+
+        self.user_entry.grid(row=0, column=1)
+        return self.user_entry
+
+    def apply(self):
+        username = (self.user_entry.get())
+
+        remove_user(username)
 
 if __name__ == '__main__':
     root = Tkinter.Tk()
     Pmw.initialise(root)
     root.title('Admin Gui')
     widget = Widget(root)
-    root.after(1000,widget.clear)
-    root.after(1000,widget.update)
+    root.after(1000,widget.clear_log)
+    root.after(1000,widget.update_log)
     root.mainloop()
