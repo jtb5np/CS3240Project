@@ -4,7 +4,6 @@ import threading
 from Queue import *
 from time import sleep
 import os
-import shutil
 
 from client import Client
 

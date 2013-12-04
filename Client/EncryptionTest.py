@@ -38,8 +38,3 @@ def decrypt(in_file, out_file, password, key_length=32):
             chunk = chunk[:-padding_length]
             finished = True
         out_file.write(chunk)
-
-#with open('TestEncryption.txt', 'rb') as in_file, open('TestEncryptionEncrypted.txt', 'wb') as out_file:
-#    encrypt(in_file, out_file, "ThisPassword");
-#with open('TestEncryptionEncrypted.txt', 'rb') as in_file, open('TestEncryptionEncryptedDecrypted.txt', 'wb') as out_file:
-#    decrypt(in_file, out_file, "ThisPassword");

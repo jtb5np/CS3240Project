@@ -1,10 +1,7 @@
 __author__ = 'xf3da'
 
-import logging
 import socket
-import errno
 import xmlrpclib
-import logging
 
 
 def create_account(dest_ip, dest_port, client_mac, username, user_password):

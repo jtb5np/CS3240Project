@@ -1,6 +1,5 @@
 __author__ = 'Jacob'
 
-from subprocess import *
 from time import sleep
 import os
 from Queue import *

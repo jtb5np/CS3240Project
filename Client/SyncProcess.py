@@ -4,7 +4,6 @@ __author__ = 'Jacob'
 
 from Queue import Queue
 import LocalGui
-import threading
 import os
 import sys
 import socket
