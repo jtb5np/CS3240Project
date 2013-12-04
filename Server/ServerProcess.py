@@ -54,18 +54,19 @@ def main():
                 username = raw_input("Please give me the user name: ")
                 try:
                     server_comm.get_user_information(username)
-                except: OSError
+                except OSError:
                     pass
             else:
-
-
+                print "place holder"
             continue
-        elif answer == 3: # TODO not working for now. pwdb.AdminFindUserFileNum and Size not working properly
+        elif answer == 3:
             print "You selected 3."
             username = raw_input("Please give me the user name: ")
             remove_file = raw_input("Do you want to remove all files also? y/n")
+            directory = ''
             if remove_file == 'y':
                 remove_file = True
+                directory = server_comm.account_manager.getAccountDirectory(username)
             elif remove_file == 'n':
                 remove_file = False
             else:
@@ -74,8 +75,8 @@ def main():
             if server_comm.delete_account(username):
                 print "Account " + username + " has been successfully removed from the database."
                 if remove_file:
-                    if server_comm.remove_account_directory(username):
-                        print "Account folders successfully removed."
+                    if server_comm.remove_account_directory(directory):
+                        print "Account files successfully removed."
                     else:
                         print "Nope account folder removal was not successful. Please consult the Spiderman"
                     continue

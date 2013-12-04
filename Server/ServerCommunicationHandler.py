@@ -75,14 +75,15 @@ class ServerCommunicationHandler(threading.Thread):
                         del self.mac_file_lists[mac]
                         del self.mac_deleted_file_lists[mac]
                     del self.username_mac_addresses[username]
+                return True
+            else: return False
         except OSError:
             return False
             pass
 
-    def remove_account_directory(self, username):
+    def remove_account_directory(self, path):
         try:
-            path = self.account_manager.getAccountDirectory(username)
-            os.rmdir(path)
+            shutil.rmtree(path)
             return True
         except:
             return False
@@ -149,7 +150,8 @@ class ServerCommunicationHandler(threading.Thread):
             entry = LogEntry.LogEntry(username, "Logged In")
             self.log.addEntry(entry)
             if username in self.username_mac_addresses.keys():
-                self.username_mac_addresses[username].append(client_mac)
+                if client_mac not in self.username_mac_addresses[username]:
+                    self.username_mac_addresses[username].append(client_mac)
             else:
                 self.username_mac_addresses[username] = [client_mac]
 
