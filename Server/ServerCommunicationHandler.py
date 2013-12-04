@@ -75,6 +75,8 @@ class ServerCommunicationHandler(threading.Thread):
                         del self.mac_file_lists[mac]
                         del self.mac_deleted_file_lists[mac]
                     del self.username_mac_addresses[username]
+                    entry = LogEntry.LogEntry("Admin", "Deleted User: " + username )
+                    self.log.addEntry(entry)
                 return True
             else: return False
         except OSError:
@@ -84,6 +86,8 @@ class ServerCommunicationHandler(threading.Thread):
     def remove_account_directory(self, path):
         try:
             shutil.rmtree(path)
+            entry = LogEntry.LogEntry("Admin", "Removed Account Directory at: " + path)
+            self.log.addEntry(entry)
             return True
         except:
             return False
@@ -117,10 +121,6 @@ class ServerCommunicationHandler(threading.Thread):
             entry = LogEntry.LogEntry("Server", "Sent All Files: " + " to " + username )
             self.log.addEntry(entry)
             ret_list = [self.get_most_recent_timestamp(username)]
-
-            print "Directory: " + self.account_manager.getAccountDirectory(username)
-
-
             for filename in self.get_files_in(self.account_manager.getAccountDirectory(username) + "onedir"):
                 f_stripped = filename.replace(self.account_manager.getAccountDirectory(username), '')
                 print f_stripped
@@ -145,7 +145,6 @@ class ServerCommunicationHandler(threading.Thread):
         return latest_time
 
     def sign_in(self, client_ip, client_port, username, user_password, client_mac):
-        print "In ServerCommunicationHandler sign_in()"
         if self.account_manager.loginAccount(username, user_password): #if the login was successful
             entry = LogEntry.LogEntry(username, "Logged In")
             self.log.addEntry(entry)
@@ -162,38 +161,33 @@ class ServerCommunicationHandler(threading.Thread):
                 self.mac_deleted_file_lists[client_mac] = []
 
             if username in self.active_clients:#if the same username has already logged in from other ip/port
-                print "User " + username + " has logged in from other IP address, but hey you can still join using this IP!"
                 self.active_clients[username].append(ClientData(client_ip, client_port))
-                print self.active_clients
             else: #if no client detected under this username
-                print "Welcome " + username +  " to your first log in!"
                 self.active_clients[username] = [ClientData(client_ip, client_port)]
-                print self.active_clients
             return True
         else:
-            print "Username and password don't match our database" # TODO need logging here
-            print 'user name: ' + username
-            print 'password: ' + user_password
             return False
 
     def sign_out(self, username, client_ip, client_port):
-        print "Sign out request received. Username: " + username + " at IP: " + client_ip
         if self.check_sign_in(username, client_ip, client_port): # if the client has actually signed in
             temp = ClientData(client_ip, client_port)
             self.active_clients[username].remove(temp) # remove from list by value
             print self.active_clients[username]
+            entry = LogEntry.LogEntry(username, "Signed Out")
+            self.log.addEntry(entry)
             return True
         else: # not signed in
             return False
 
     def change_password(self, username, new_password, client_ip, client_port, admin = False):
-        print "Commencing changing password for user " + username + ", changing password to " + new_password
         if admin:
-            print "Admin User changing password"
+            entry = LogEntry.LogEntry("Admin", "Changed " + username + "'s password to: " + new_password)
+            self.log.addEntry(entry)
             return self.account_manager.changePassword(username, new_password)
         else:
             if self.check_sign_in(username, client_ip, client_port):
-                print "Server changing password to " + new_password
+                entry = LogEntry.LogEntry(username, "Changed " + username + "'s password to: " + new_password)
+                self.log.addEntry(entry)
                 return self.account_manager.changePassword(username, new_password)
             else:
                 return False
@@ -260,11 +254,7 @@ class ServerCommunicationHandler(threading.Thread):
             entry = LogEntry.LogEntry("Server", "Received File: " + filename + " from " + username )
             self.log.addEntry(entry)
             path, name = os.path.split(filename)
-            print "Path: " + path
-            print "Name: " + name
-            print "Username: " + username
             user_root_dir = self.account_manager.getAccountDirectory(username)
-            print "user_root = " + `user_root_dir`
             if not os.path.exists(user_root_dir + path):
                 os.makedirs(user_root_dir + path)
             try:
@@ -284,7 +274,6 @@ class ServerCommunicationHandler(threading.Thread):
             entry = LogEntry.LogEntry("Server", "Received Folder: " + folder_name + " from " + username )
             self.log.addEntry(entry)
             user_root_dir = self.account_manager.getAccountDirectory(username)
-            print "user_root = " + `user_root_dir`
             if not os.path.exists(user_root_dir + folder_name):
                 for ma in self.username_mac_addresses[username]:
                         if not ma == mac_addr:
@@ -300,24 +289,23 @@ class ServerCommunicationHandler(threading.Thread):
         # authenticate user
         if self.check_sign_in(username, client_ip, client_port): # if signed in
             ret_list = []
-            for filename in self.mac_file_lists[client_mac]:
-                #entry = LogEntry.LogEntry("Server", "Sent File: " + filename + " to " + username )
-                #self.log.addEntry(entry)
-                if os.path.isdir(self.account_manager.getAccountDirectory(username) + filename):
-                    ret_list.append((filename, None))
-
-                    print "SENDING: " + filename
-
-                    entry = LogEntry.LogEntry("HERE Server", "Sent File: " + filename + " to " + username )
-                    self.log.addEntry(entry)
-                else:
-                    with open(self.account_manager.getAccountDirectory(username) + filename, "rb") as handle:
-                        binary_data = xmlrpclib.Binary(handle.read())
-                        print "File " + filename + "sent to " + client_ip
-                        entry = LogEntry.LogEntry("Server", "Sent File: " + filename + " to " + username )
+            try:
+                for filename in self.mac_file_lists[client_mac]:
+                    #entry = LogEntry.LogEntry("Server", "Sent File: " + filename + " to " + username )
+                    #self.log.addEntry(entry)
+                    if os.path.isdir(self.account_manager.getAccountDirectory(username) + filename):
+                        ret_list.append((filename, None))
+                        entry = LogEntry.LogEntry("HERE Server", "Sent File: " + filename + " to " + username )
                         self.log.addEntry(entry)
-                        ret_list.append((filename, binary_data))
-            del self.mac_file_lists[client_mac][:]
+                    else:
+                        with open(self.account_manager.getAccountDirectory(username) + filename, "rb") as handle:
+                            binary_data = xmlrpclib.Binary(handle.read())
+                            entry = LogEntry.LogEntry("Server", "Sent File: " + filename + " to " + username )
+                            self.log.addEntry(entry)
+                            ret_list.append((filename, binary_data))
+                del self.mac_file_lists[client_mac][:]
+            except KeyError:
+                pass
             return ret_list
         else:
             return []
@@ -327,12 +315,15 @@ class ServerCommunicationHandler(threading.Thread):
         # authenticate user
         if self.check_sign_in(username, client_ip, client_port): # if signed in
             ret_list = []
-            for filename in self.mac_deleted_file_lists[client_mac]:
+            try:
+                for filename in self.mac_deleted_file_lists[client_mac]:
                     ret_list.append(filename)
                     entry = LogEntry.LogEntry(username, "Deleted File: " + filename + " at Mac Address " + client_mac)
                     self.log.addEntry(entry)
-            del self.mac_deleted_file_lists[client_mac][:]
+                del self.mac_deleted_file_lists[client_mac][:]
 
+            except KeyError:
+                pass
             return ret_list
         else:
             return []
@@ -385,7 +376,6 @@ class ServerCommunicationHandler(threading.Thread):
             print filename
             print username
             total_file_name = self.account_manager.getAccountDirectory(username) + filename
-            print "Total_file_name = " + total_file_name
             try:
                 for ma in self.username_mac_addresses[username]:
                     if os.path.isdir(total_file_name):
@@ -399,17 +389,16 @@ class ServerCommunicationHandler(threading.Thread):
                     if not ma == mac_addr:
                         self.mac_deleted_file_lists[ma].append(filename)
                 if os.path.isdir(total_file_name):
-                    print "Trying to remove folder" + total_file_name
                     shutil.rmtree(total_file_name)
-                    print "YAY Folder Removed"
+                    entry = LogEntry.LogEntry("Server", "Deleted File: " + filename + " owned by " + username + " at " + mac_addr)
+                    self.log.addEntry(entry)
                     return True
                 else:
-                    print "Trying to remove file" + total_file_name
                     os.remove(total_file_name)
-                    print "YAY File removed"
+                    entry = LogEntry.LogEntry("Server", "Deleted File: " + filename + " owned by " + username + " at " + mac_addr)
+                    self.log.addEntry(entry)
                     return False
             except OSError:
-                print "Nope dude"
                 return False
         else:
             return False
