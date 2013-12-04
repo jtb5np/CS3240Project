@@ -121,10 +121,10 @@ class dbManager:
 
     #counts number of subdirectories in path (used to determine current serverId at startup)
     def get_subdirs(self, path):
-        return len(os.listdir(path))-1
+        return len(os.listdir(path))
 
     #removing user account
-    def deleteAccount(self, user_name, deleteFolderFlag = False):
+    def deleteAccount(self, user_name):
         self.conn = sqlite3.connect(self.rootPath+'passwords.db')
         self.conn.text_factory = str
         self.c = self.conn.cursor()
@@ -137,8 +137,6 @@ class dbManager:
             self.c.execute('''DELETE FROM user WHERE user_name=?''',(user_name,))
             self.conn.commit()
             #Experimental- also delete user folder, path stored above as userFolder
-            if(deleteFolderFlag == True):
-                shutil.rmtree(userFolder)
             return True
         #no such user
         return False
