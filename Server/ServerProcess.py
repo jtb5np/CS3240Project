@@ -49,7 +49,7 @@ def main():
             except:
                 print "ERROR: can't get users. Please contact your admin"
         elif answer == 2:
-            option = raw_input("1. Per user\n2. Total")
+            option = raw_input("1. Per user\n2. Total\n")
             if option == '1':
                 username = raw_input("Please give me the user name: ")
                 try:
@@ -57,7 +57,12 @@ def main():
                 except OSError:
                     pass
             else:
-                print "place holder"
+                file_size = server_comm.get_total_file_size()
+                file_num = server_comm.get_total_file_number()
+                if file_size and file_num:
+                    print "There are " + str(file_num) + " files in total. Total size = " + str(file_size) + " bytes."
+                else:
+                    print "ERROR: can't find the total file size/number."
             continue
         elif answer == 3:
             print "You selected 3."

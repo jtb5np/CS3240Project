@@ -348,6 +348,18 @@ class ServerCommunicationHandler(threading.Thread):
         except:
             return False
 
+    def get_total_file_size(self):
+        try:
+            return self.account_manager.adminFindTotalFileSize()
+        except OSError:
+            return False
+
+    def get_total_file_number(self):
+        try:
+            return self.account_manager.adminFindTotalFileNum()
+        except OSError:
+            return False
+
     def get_system_information(self):
         size_files = self.account_manager.get_size(self.server.base_folder)
         num_files = self.account_manager.fcount(self.server.base_folder)

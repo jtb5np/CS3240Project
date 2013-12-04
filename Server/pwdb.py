@@ -124,7 +124,7 @@ class dbManager:
         return len(os.listdir(path))-1
 
     #removing user account
-    def deleteAccount(self, user_name):
+    def deleteAccount(self, user_name, deleteFolderFlag = False):
         self.conn = sqlite3.connect(self.rootPath+'passwords.db')
         self.conn.text_factory = str
         self.c = self.conn.cursor()
@@ -137,6 +137,8 @@ class dbManager:
             self.c.execute('''DELETE FROM user WHERE user_name=?''',(user_name,))
             self.conn.commit()
             #Experimental- also delete user folder, path stored above as userFolder
+            if(deleteFolderFlag == True):
+                shutil.rmtree(userFolder)
             return True
         #no such user
         return False
@@ -153,7 +155,11 @@ class dbManager:
     def fcount(self, path):
         count = 0
         for root, dirs, files in os.walk(path):
-            count += len(files)
+            tempFileArray = files
+            for x in files:
+                if x[0] == '.':
+                    tempFileArray.remove(x)
+            count += len(tempFileArray)
         return count
 
     #finds the size of a directory
@@ -161,8 +167,9 @@ class dbManager:
         total_size = 0
         for dirpath, dirnames, filenames in os.walk(path):
             for f in filenames:
-                fp = os.path.join(dirpath, f)
-                total_size += os.path.getsize(fp)
+                if not f[0] == '.':
+                    fp = os.path.join(dirpath, f)
+                    total_size += os.path.getsize(fp)
         return total_size
 
     #finding total file number per user
@@ -190,3 +197,11 @@ class dbManager:
             path = self.getAccountDirectory(user_name)
             return self.get_size(path)
         return -1
+
+    def adminFindTotalFileSize(self):
+        dbFile = open(self.rootPath+'passwords.db')
+        dbSize = os.fstat(dbFile.fileno()).st_size
+        return self.get_size(self.rootPath) - dbSize
+
+    def adminFindTotalFileNum(self):
+        return self.fcount(self.rootPath)-1
