@@ -123,13 +123,11 @@ class ServerCommunicationHandler(threading.Thread):
             ret_list = [self.get_most_recent_timestamp(username)]
             for filename in self.get_files_in(self.account_manager.getAccountDirectory(username) + "onedir"):
                 f_stripped = filename.replace(self.account_manager.getAccountDirectory(username), '')
-                print f_stripped
                 if os.path.isdir(filename):
                     ret_list.append((f_stripped, None))
                 else:
                     with open(filename, "rb") as handle:
                          binary_data = xmlrpclib.Binary(handle.read())
-                         print "File " + filename + "sent to " + client_ip
                          ret_list.append((f_stripped, binary_data))
             return ret_list
         else:
@@ -172,7 +170,6 @@ class ServerCommunicationHandler(threading.Thread):
         if self.check_sign_in(username, client_ip, client_port): # if the client has actually signed in
             temp = ClientData(client_ip, client_port)
             self.active_clients[username].remove(temp) # remove from list by value
-            print self.active_clients[username]
             entry = LogEntry.LogEntry(username, "Signed Out")
             self.log.addEntry(entry)
             return True
@@ -328,7 +325,7 @@ class ServerCommunicationHandler(threading.Thread):
         else:
             return []
 
-    def get_user_information(self,user_name): # TODO not working - 2 methods in account_manager not working properly
+    def get_user_information(self,user_name):
         try:
             account_dir = self.account_manager.getAccountDirectory(user_name)
             num_files = self.account_manager.adminFindFileNum(user_name)
@@ -357,7 +354,7 @@ class ServerCommunicationHandler(threading.Thread):
         num_users = self.account_manager.serverDirectoryId
         print "System has " + num_files + " files totaling " + size_files + " bits between " + num_users + " users"
 
-    def print_log(self): # TODO: PROBLEM HERE. When I first started the server and then call this method it says "'list' object has no attribute 'print_log'"
+    def print_log(self):
         self.log.printLog()
 
     def start_server(self):
@@ -373,8 +370,6 @@ class ServerCommunicationHandler(threading.Thread):
     def delete_file(self, filename, username, client_ip, client_port, mac_addr):
         #use the user_id to find where the file should be stored (within the base folder)
         if self.check_sign_in(username, client_ip, client_port):
-            print filename
-            print username
             total_file_name = self.account_manager.getAccountDirectory(username) + filename
             try:
                 for ma in self.username_mac_addresses[username]:
