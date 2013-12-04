@@ -77,7 +77,6 @@ class LocalGui():
 
     def signout(self):
         if self.lch.sign_out():
-            print "Sign out successful"
             self.label_text.set("Enter 'on' to turn synchronization back on.")
             self.control = 'signout'
 
@@ -88,10 +87,10 @@ class LocalGui():
     def finish(self):
         if self.lch.sign_out():
             print "User signed out"
-            self.exit_client()
-            self.master.destroy()
         else:
             print "ERROR: Sign out unsuccessful"
+        self.exit_client()
+        self.master.destroy()
 
     def finish_without_stopping(self):
         self.on = False

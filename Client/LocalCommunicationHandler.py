@@ -149,7 +149,6 @@ class LocalCommunicationHandler(threading.Thread):
     # just started by Mark
     def sign_out(self):
         if self.client.sign_out():
-            print "Sign out successful!"
             self.signed_in = False
             return True
         else:
