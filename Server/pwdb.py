@@ -190,7 +190,3 @@ class dbManager:
             path = self.getAccountDirectory(user_name)
             return self.get_size(path)
         return -1
-
-myDatabase = dbManager("/Users/andersquigg/PycharmProjects/CS3240Project/Server/AccountDirectory");
-print myDatabase.adminFindFileSize('TestName')
-print myDatabase.getAccountDirectory('TestName')
