@@ -1,6 +1,7 @@
 import sqlite3
 import os
 import hashlib
+import shutil
 
 class dbManager:
 
@@ -36,6 +37,14 @@ class dbManager:
             self.serverDirectoryId += 1
             return True
         return False
+
+    def printDatabase(self):
+        self.conn = sqlite3.connect(self.rootPath+'passwords.db')
+        self.conn.text_factory = str
+        self.c = self.conn.cursor()
+        self.c.execute('SELECT * FROM user')
+        database = self.c.fetchall()
+        print database
 
     #Changes a user's password
     def changePassword(self, user_name, newPassword):
@@ -110,25 +119,9 @@ class dbManager:
             return result[0]
         return "No such user"
 
-    #counts number of files within a directory
-    def fcount(self, path):
-        count = 0
-        for root, dirs, files in os.walk(path):
-            count += len(files)
-        return count
-
     #counts number of subdirectories in path (used to determine current serverId at startup)
     def get_subdirs(self, path):
         return len(os.listdir(path))-1
-
-    #finds the size of a directory
-    def get_size(self, path):
-        total_size = 0
-        for dirpath, dirnames, filenames in os.walk(path):
-            for f in filenames:
-                fp = os.path.join(dirpath, f)
-                total_size += os.path.getsize(fp)
-        return total_size
 
     #removing user account
     def deleteAccount(self, user_name):
@@ -137,10 +130,13 @@ class dbManager:
         self.c = self.conn.cursor()
         self.c.execute('''SELECT serverId FROM user WHERE user_name=?''',(user_name,))
         user = self.c.fetchall()
+        userFolder = self.getAccountDirectory(user_name)
+        print user;
         #Check to make sure user_name was valid
-        if len(user == 1):
+        if len(user) == 1:
             self.c.execute('''DELETE FROM user WHERE user_name=?''',(user_name,))
             self.conn.commit()
+            #Experimental- also delete user folder, path stored above as userFolder
             return True
         #no such user
         return False
@@ -153,6 +149,22 @@ class dbManager:
         self.c.execute('''SELECT user_name FROM user''')
         return self.c.fetchall()
 
+    #counts number of files within a directory
+    def fcount(self, path):
+        count = 0
+        for root, dirs, files in os.walk(path):
+            count += len(files)
+        return count
+
+    #finds the size of a directory
+    def get_size(self, path):
+        total_size = 0
+        for dirpath, dirnames, filenames in os.walk(path):
+            for f in filenames:
+                fp = os.path.join(dirpath, f)
+                total_size += os.path.getsize(fp)
+        return total_size
+
     #finding total file number per user
     def adminFindFileNum(self, user_name):
         self.conn = sqlite3.connect(self.rootPath+'passwords.db')
@@ -161,12 +173,12 @@ class dbManager:
         self.c.execute('''SELECT serverId FROM user WHERE user_name=?''',(user_name,))
         user = self.c.fetchall()
         #Check to make sure user_name was valid
-        if len(user == 1):
-            path = self.rootPath+`user[0]`
+        if len(user) == 1:
+            path = self.getAccountDirectory(user_name)
             return self.fcount(path)
         return -1
 
-    #finding total file size per user
+    #finding total file size per user IN BYTES!!!
     def adminFindFileSize(self, user_name):
         self.conn = sqlite3.connect(self.rootPath+'passwords.db')
         self.conn.text_factory = str
@@ -174,7 +186,11 @@ class dbManager:
         self.c.execute('''SELECT serverId FROM user WHERE user_name=?''',(user_name,))
         user = self.c.fetchall()
         #Check to make sure user_name was valid
-        if len(user == 1):
-            path = self.rootPath+`user[0]`
+        if len(user) == 1:
+            path = self.getAccountDirectory(user_name)
             return self.get_size(path)
         return -1
+
+myDatabase = dbManager("/Users/andersquigg/PycharmProjects/CS3240Project/Server/AccountDirectory");
+print myDatabase.adminFindFileSize('TestName')
+print myDatabase.getAccountDirectory('TestName')
