@@ -40,12 +40,25 @@ def main():
             continue
         if answer == 1: # TODO I don't quite understand the requirement here. What "Information" do we need to display about all users?
             try:
-                print server_comm.display_users()
+                users = server_comm.display_users()
+                print "------------------------------\nUser List:"
+                for user in users:
+                    print user[0]
+                print "------------------------------"
+                continue
             except:
                 print "ERROR: can't get users. Please contact your admin"
-        elif answer == 2: # TODO not working for now. pwdb.AdminFindUserFileNum and Size not working properly
-            username = raw_input("Please give me the user name: ")
-            server_comm.get_user_information(username)
+        elif answer == 2:
+            option = raw_input("1. Per user\n2. Total")
+            if option == '1':
+                username = raw_input("Please give me the user name: ")
+                try:
+                    server_comm.get_user_information(username)
+                except: OSError
+                    pass
+            else:
+
+
             continue
         elif answer == 3: # TODO not working for now. pwdb.AdminFindUserFileNum and Size not working properly
             print "You selected 3."
