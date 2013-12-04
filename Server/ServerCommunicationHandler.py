@@ -331,7 +331,7 @@ class ServerCommunicationHandler(threading.Thread):
             num_files = self.account_manager.adminFindFileNum(user_name)
             size_files = self.account_manager.adminFindFileSize(user_name)
             print "User information found: "
-            print "User: " + user_name + " has " + str(num_files) + " files totaling " + str(size_files) + " bits in " + account_dir
+            print "User: " + user_name + " has " + str(num_files) + " files totaling " + str(size_files) + " bytes in " + account_dir
             return True
         except:
             return False
@@ -352,7 +352,7 @@ class ServerCommunicationHandler(threading.Thread):
         size_files = self.account_manager.get_size(self.server.base_folder)
         num_files = self.account_manager.fcount(self.server.base_folder)
         num_users = self.account_manager.serverDirectoryId
-        print "System has " + num_files + " files totaling " + size_files + " bits between " + num_users + " users"
+        print "System has " + num_files + " files totaling " + size_files + " bytes between " + num_users + " users"
 
     def print_log(self):
         self.log.printLog()
