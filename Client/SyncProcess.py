@@ -50,22 +50,14 @@ def main():
         if lch.create_new_account(user_id, password):
             if lch.sign_in(user_id, password):
                 signed_in = True
-                print "Sign in successful!"
-            else:
-                print "ERROR: Sign in unsuccessful"
-        else:
-            print "ERROR: Creating account unsuccessful"
     elif answer == '2':
         if lch.sign_in(user_id, password):
             signed_in = True
-            print "Sign in successful!"
-        else:
-            print "ERROR: Sign in unsuccessful"
 
     if signed_in:
         lch.start()
     else:
-        print "Exiting..."
+        print "Could not sign in; exiting..."
         exit_client(lch, fwr)
 
     while True:
@@ -84,7 +76,6 @@ def exit_client(lch = None, fwr = None):
         lch._Thread__stop()
     if fwr is not None:
         fwr._Thread__stop()
-    print "Exited."
     sys.exit(0)
 
 

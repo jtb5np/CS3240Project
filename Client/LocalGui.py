@@ -56,7 +56,6 @@ class LocalGui():
             response = self.e.get()
             if response == 'on':
                 if self.lch.sign_in(self.user_id, self.password):
-                    print 'sign in successful'
                     self.control = ''
                     self.label_text.set("Please make a selection.")
         elif self.control == 'share':
@@ -103,5 +102,4 @@ class LocalGui():
             self.lch._Thread__stop()
         if self.fwr is not None:
             self.fwr._Thread__stop()
-        print "Exited."
         sys.exit(0)

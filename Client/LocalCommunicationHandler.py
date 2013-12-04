@@ -74,10 +74,8 @@ class LocalCommunicationHandler(threading.Thread):
                 self.delete_files()
             self.clear_all_local_files()
             self.get_all_server_files()
-            print 'Sign in successful'
             return True
         else:
-            print "Sign in unsuccessful for user " + uid
             return False
 
     def change_password(self, new_password):
@@ -157,20 +155,17 @@ class LocalCommunicationHandler(threading.Thread):
             self.signed_in = False
             return True
         else:
-            print "Seems like you are not logged in anyway..."
             return False
 
     #should be pretty much complete, need to test (definitely delete print statement when done)
     def send_file(self, file_name):
         #send a file to be copied to the server
         #uncomplete
-        print 'prepare to send: ' + file_name
         status = self.client.push_file(file_name)
         return status
 
     def send_deleted_file(self, file_name):
         #send a file to be deleted from the server
-        print 'sent to be deleted: ' + file_name
         status = self.client.delete_file(file_name)
         return status
 
@@ -207,7 +202,7 @@ class LocalCommunicationHandler(threading.Thread):
         if self.signed_in:
             try:
                 name = self.file_names.get(True, .1)
-                if self.signed_in: # why the second time?
+                if self.signed_in:
                     self.send_file(name)
                 else:
                     self.file_names.put(name)

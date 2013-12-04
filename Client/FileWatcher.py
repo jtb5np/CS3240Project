@@ -99,14 +99,11 @@ class FileWatcher(threading.Thread):
         modified_files = self.find_modified_files()
         for f in new_files:
             self.file_names.put(f)
-            print "new files: " + f
         for f in modified_files:
             if f not in new_files and f in self.files:
                 self.file_names.put(f)
-                print "modified files: " + f
         for f in deleted_files:
             self.deleted_file_names.put(f)
-            print "deleted files: " + f
 
     def update_local_files(self):
         self.modify_local_file()
