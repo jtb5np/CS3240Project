@@ -131,7 +131,6 @@ class LocalCommunicationHandler(threading.Thread):
     def get_all_server_files(self):
         list_from_server = self.client.get_all_files()
         timestamp = list_from_server.pop(0)
-        print timestamp
         #print list_from_server
         for name, filedata in list_from_server:
             self.incoming_file_names.put((name, filedata))
