@@ -1,4 +1,4 @@
-from Server import LogEntry
+import LogEntry
 
 __author__ = 'wil'
 
@@ -8,7 +8,6 @@ class Log:
 
     def __init__(self, history = []):
         self.log = history
-        self.log_file = open("log.txt", "a")
 
     def addEntry(self, entry):
 
@@ -28,7 +27,7 @@ class Log:
 
     def update_log_file(self,entry):
         with open("log.txt", "a") as myFile:
-            myFile.write(str(entry.printLogEntry()))
+            myFile.write(entry.printLogEntry()+"\n")
 
     def get_actor_activity(self,actor):
 
