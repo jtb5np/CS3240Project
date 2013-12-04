@@ -15,6 +15,7 @@ class LocalGui():
         self.master = Tk()
         self.master.wm_minsize(280, 180)
         self.master.configure(background="#e5eaff")
+        self.master.wm_title("File Synchronization")
         self.label_text = StringVar()
         self.entry_text = ''
         self.label_text.set("Please make a selection.")
@@ -45,6 +46,7 @@ class LocalGui():
         if self.control == 'password':
             password = self.e.get()
             if self.lch.change_password(password):
+                self.password = password
                 print "Password changed to: " + password
             else:
                 print "ERROR: password unchanged. Please make sure that you are logged in"

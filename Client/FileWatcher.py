@@ -40,15 +40,11 @@ class FileWatcher(threading.Thread):
         for f in self.get_files_in(self.path_name):
             if not os.path.isdir(f):
                 try:
-                    #print self.synced_from_server
-                    if f not in self.synced_from_server:
-                        t = os.path.getmtime(f)
-                    else:
-                        t = 0
+                    t = os.path.getmtime(f)
                 except OSError:
                     t = 0
                 if t > self.latest_time:
-                    if not self.latest_time == 0:
+                    if not self.latest_time == 0 and f not in self.synced_from_server:
                         mod_files.append(f)
                     if t > temp_latest_time:
                         temp_latest_time = t
