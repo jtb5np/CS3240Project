@@ -23,6 +23,9 @@ def main():
 
     server_comm = ServerCommunicationHandler.ServerCommunicationHandler(server_ip, port, account_manager)
 
+    #server_comm.account_manager.getAccountDirectory("Anders")
+
+
     exit = False
     main_menu = "1. List of users\n2. User Information\n3. Remove User Account\n4. Change User Password\n5. Check Log\nPlease select what you want to do here: "
 
