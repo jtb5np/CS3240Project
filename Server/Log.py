@@ -19,11 +19,8 @@ class Log:
         print self.log[len(self.log)-1]
 
     def printLog(self):
-
         for x in self.log:
-
-            if isinstance(x, LogEntry):
-                x.printLogEntry()
+            x.printToConsole()
 
     def update_log_file(self,entry):
         with open("log.txt", "a") as myFile:

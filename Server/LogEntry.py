@@ -42,7 +42,8 @@ class LogEntry:
         out = self.getActor() + ' : ' + self.getTimeStamp() + ' - ' + (self.getInfo())
         return out
 
-
+    def printToConsole(self):
+        print self.getActor() + ' : ' + self.getTimeStamp() + ' - ' + (self.getInfo())
 
 
 

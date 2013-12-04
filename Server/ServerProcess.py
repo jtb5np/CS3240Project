@@ -14,10 +14,11 @@ def get_local_ip():
     return current_local_ip
 
 def main():
-    root_dir = raw_input("What do you want to use as server file storage directory: ")
 
-    if root_dir == 'test':
-        root_dir = "/Users/xf3da/Desktop/Account Folder"
+    root_dir = os.getcwd() + "/Server Folder"
+
+    if not os.path.exists(root_dir):
+        os.makedirs(root_dir)
 
     server_ip = get_local_ip()
     port = 8000
@@ -26,9 +27,6 @@ def main():
     account_manager = dbManager(root_dir)
 
     server_comm = ServerCommunicationHandler.ServerCommunicationHandler(server_ip, port, account_manager)
-
-    #server_comm.account_manager.getAccountDirectory("Anders")
-
 
     exit = False
     main_menu = "1. List of users\n2. User Information\n3. Remove User Account\n4. Change User Password\n5. Check Log\nPlease select what you want to do here: "
@@ -47,11 +45,8 @@ def main():
                 print "ERROR: can't get users. Please contact your admin"
         elif answer == 2: # TODO not working for now. pwdb.AdminFindUserFileNum and Size not working properly
             username = raw_input("Please give me the user name: ")
-            if server_comm.get_user_information(username):
-                continue
-            else:
-                print "Sorry, " + username + " does not exit. Pleaes check again."
-                continue
+            server_comm.get_user_information(username)
+            continue
         elif answer == 3: # TODO not working for now. pwdb.AdminFindUserFileNum and Size not working properly
             print "You selected 3."
             username = raw_input("Please give me the user name: ")

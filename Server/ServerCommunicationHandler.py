@@ -340,7 +340,8 @@ class ServerCommunicationHandler(threading.Thread):
             account_dir = self.account_manager.getAccountDirectory(user_name)
             num_files = self.account_manager.adminFindFileNum(user_name)
             size_files = self.account_manager.adminFindFileSize(user_name)
-            print "User: " + user_name + " has " + num_files + " files totaling " + size_files + " bits in " + account_dir
+            print "User information found: "
+            print "User: " + user_name + " has " + str(num_files) + " files totaling " + str(size_files) + " bits in " + account_dir
             return True
         except:
             return False
@@ -349,11 +350,10 @@ class ServerCommunicationHandler(threading.Thread):
         size_files = self.account_manager.get_size(self.server.base_folder)
         num_files = self.account_manager.fcount(self.server.base_folder)
         num_users = self.account_manager.serverDirectoryId
-
         print "System has " + num_files + " files totaling " + size_files + " bits between " + num_users + " users"
 
     def print_log(self): # TODO: PROBLEM HERE. When I first started the server and then call this method it says "'list' object has no attribute 'print_log'"
-        self.log.log.print_log()
+        self.log.printLog()
 
     def start_server(self):
         self.server = SimpleXMLRPCServer((self.ip, self.port), allow_none =True, logRequests=False)
