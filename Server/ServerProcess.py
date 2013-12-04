@@ -14,7 +14,11 @@ def get_local_ip():
     return current_local_ip
 
 def main():
-    root_dir = "/Users/xf3da/Desktop/Account Folder"
+    root_dir = raw_input("What do you want to use as server file storage directory: ")
+
+    if root_dir == 'test':
+        root_dir = "/Users/xf3da/Desktop/Account Folder"
+
     server_ip = get_local_ip()
     port = 8000
 
